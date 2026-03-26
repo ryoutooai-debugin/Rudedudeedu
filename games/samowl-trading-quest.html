@@ -941,5 +941,41 @@
             }
         }, 30000);
     </script>
+    
+    <!-- Help Owl -->
+    <div class="help-owl" onclick="showHelp()" title="Click for help!">❓</div>
+    <div class="help-modal" id="helpModal">
+        <div class="help-modal-content">
+            <span class="help-close" onclick="closeHelp()">&times;</span>
+            <div style="font-size: 3em;">🦉</div>
+            <h3>What This Game Teaches 📚</h3>
+            <p>Learn trading fundamentals through quests!</p>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>📗 <strong>What is a Stock?</strong> - Ownership in a company</li>
+                <li>🐂 <strong>Bull vs Bear</strong> - Up vs down markets</li>
+                <li>🎯 <strong>Buy Low, Sell High</strong> - Trading goal</li>
+                <li>📊 <strong>Reading Charts</strong> - Price history</li>
+                <li>🏆 <strong>Quests</strong> - Complete challenges to level up</li>
+            </ul>
+            <p><strong>Tip:</strong> Use the Learn tab for detailed lessons!</p>
+            <button onclick="closeHelp()" style="margin-top: 15px; padding: 10px 25px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer;">Got it!</button>
+        </div>
+    </div>
+    
+    <script>
+        function showHelp() { document.getElementById('helpModal').style.display = 'flex'; }
+        function closeHelp() { document.getElementById('helpModal').style.display = 'none'; }
+        document.getElementById('helpModal').addEventListener('click', function(e) {
+            if (e.target === document.getElementById('helpModal')) closeHelp();
+        });
+    </script>
+    
+    <style>
+        .help-owl { position: fixed; bottom: 20px; right: 20px; font-size: 2em; cursor: pointer; z-index: 9999; background: #667eea; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .help-owl:hover { transform: scale(1.1); }
+        .help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; }
+        .help-modal-content { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #667eea; border-radius: 20px; padding: 30px; max-width: 450px; color: white; text-align: center; }
+        .help-close { position: absolute; right: 20px; top: 10px; font-size: 2em; cursor: pointer; }
+    </style>
 </body>
 </html>
