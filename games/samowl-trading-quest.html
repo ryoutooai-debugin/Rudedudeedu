@@ -738,8 +738,35 @@
             // Select first stock
             selectStock(stocks[0]);
             
+            // Start price cycling
+            setInterval(updateStockPrices, 2000);
+            
             updateDisplay();
             renderQuests();
+        }
+
+        function updateStockPrices() {
+            stocks.forEach(stock => {
+                // Small random price change (-3% to +3%)
+                const change = (Math.random() - 0.5) * 0.06 * gameState.stockPrices[stock].current;
+                gameState.stockPrices[stock].current = Math.max(10, gameState.stockPrices[stock].current + change);
+                
+                // Update history
+                gameState.stockPrices[stock].history.shift();
+                gameState.stockPrices[stock].history.push(change >= 0);
+            });
+            
+            // Update current stock display
+            const symbol = gameState.currentStock;
+            const price = gameState.stockPrices[symbol].current;
+            const priceEl = document.getElementById('stockPrice');
+            if (priceEl) {
+                priceEl.textContent = `$${price.toFixed(2)}`;
+                priceEl.className = 'stock-price ' + (price >= gameState.stockPrices[symbol].history[gameState.stockPrices[symbol].history.length-1] ? 'up' : 'down');
+            }
+            
+            // Re-render chart
+            renderChart(symbol);
         }
 
         function selectStock(symbol) {
