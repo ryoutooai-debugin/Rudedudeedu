@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦉 Financier: Humble Beginnings</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .money { color: #00ff88; }
+        .debt { color: #ff4444; }
+        .day { color: #ffaa00; }
+        
+        .log {
+            background: #111;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .log-entry { margin: 5px 0; }
+        .log-positive { color: #00ff88; }
+        .log-negative { color: #ff4444; }
+        .log-neutral { color: #888; }
+        .log-event { color: #ffaa00; }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        button {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: #00ff88;
+            color: #000;
+        }
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .businesses {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .business-btn {
+            font-size: 14px;
+            padding: 10px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .status-poor { background: #330000; color: #ff4444; }
+        .status-stable { background: #003300; color: #00ff88; }
+        .status-rich { background: #333300; color: #ffaa00; }
+        
+        h3 { color: #00ff88; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦉 Financier: Humble Beginnings</h1>
+        <p>Build your empire. Don't let debt eat you.</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-label">CASH</div>
+            <div class="stat-value money" id="cash">$500</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">DEBT</div>
+            <div class="stat-value debt" id="debt">$0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">DAY</div>
+            <div class="stat-value day" id="day">1</div>
+        </div>
+    </div>
+    
+    <div class="status status-stable" id="status">You can pay your bills. For now.</div>
+    
+    <div class="log" id="log"></div>
+    
+    <h3>🎮 Actions</h3>
+    <div class="actions">
+        <button onclick="work()">💼 Work ($50/day)</button>
+        <button onclick="trade()">📈 Trade Stocks (+/- $100)</button>
+        <button onclick="sideHustle()">🚗 Side Hustle ($100/day)</button>
+        <button onclick="nextDay()">⏭️ Next Day</button>
+    </div>
+    
+    <h3>🏢 Buy Businesses (earn passive income)</h3>
+    <div class="businesses">
+        <button class="business-btn" onclick="buyBusiness('foodTruck', 500)" id="btn-foodTruck">🍔 Food Truck ($500/day)</button>
+        <button class="business-btn" onclick="buyBusiness('laundromat', 2000)" id="btn-laundromat">🧺 Laundromat ($2000/day)</button>
+        <button class="business-btn" onclick="buyBusiness('store', 5000)" id="btn-store">🏪 Store ($5000/day)</button>
+        <button class="business-btn" onclick="buyBusiness('factory', 15000" id="btn-factory">🏭 Factory ($15000/day)</button>
+    </div>
+    
+    <h3>💳 Loans</h3>
+    <div class="actions">
+        <button onclick="takeLoan(500)" id="btn-loan500">Borrow $500 (10% interest)</button>
+        <button onclick="payDebt(500)" id="btn-pay500">Pay $500 debt</button>
+    </div>
+    
+    <h3>🗑️ Admin</h3>
+    <div class="actions">
+        <button onclick="restart()">🔄 Restart</button>
+    </div>
+
+    <script>
+        let gameState = {
+            cash: 500,
+            debt: 0,
+            day: 1,
+            businesses: {
+                foodTruck: 0,
+                laundromat: 0,
+                store: 0,
+                factory: 0
+            },
+            dailyExpenses: 50
+        };
+        
+        const businessCosts = {
+            foodTruck: 500,
+            laundromat: 2000,
+            store: 5000,
+            factory: 15000
+        };
+        
+        const businessIncome = {
+            foodTruck: 50,
+            laundromat: 200,
+            store: 500,
+            factory: 1500
+        };
+        
+        function log(msg, type = 'neutral') {
+            const logEl = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `Day ${gameState.day}: ${msg}`;
+            logEl.insertBefore(entry, logEl.firstChild);
+        }
+        
+        function updateDisplay() {
+            document.getElementById('cash').textContent = `$${gameState.cash.toLocaleString()}`;
+            document.getElementById('debt').textContent = `$${gameState.debt.toLocaleString()}`;
+            document.getElementById('day').textContent = gameState.day;
+            
+            // Update status
+            const statusEl = document.getElementById('status');
+            if (gameState.debt > gameState.cash * 2) {
+                statusEl.className = 'status status-poor';
+                statusEl.textContent = '⚠️ DANGER: Debt is spiraling!';
+            } else if (gameState.cash > 10000) {
+                statusEl.className = 'status status-rich';
+                statusEl.textContent = '💰 YOU ARE WINNING!';
+            } else {
+                statusEl.className = 'status status-stable';
+                statusEl.textContent = '👍 Stable for now.';
+            }
+            
+            // Update business buttons
+            for (const [biz, cost] of Object.entries(businessCosts)) {
+                const btn = document.getElementById(`btn-${biz}`);
+                btn.disabled = gameState.cash < cost;
+                btn.textContent = `${getBizEmoji(biz)} ${biz.charAt(0).toUpperCase() + biz.slice(1)} ($${cost.toLocaleString()}) - earns $${businessIncome[biz].toLocaleString()}/day - OWNED: ${gameState.businesses[biz]}`;
+            }
+            
+            // Loan buttons
+            document.getElementById('btn-loan500').disabled = gameState.cash < 50;
+            document.getElementById('btn-pay500').disabled = gameState.cash < 500 || gameState.debt < 500;
+        }
+        
+        function getBizEmoji(biz) {
+            const emojis = { foodTruck: '🍔', laundromat: '🧺', store: '🏪', factory: '🏭' };
+            return emojis[biz];
+        }
+        
+        function work() {
+            gameState.cash += 50;
+            log('Worked hard. Earned $50.', 'positive');
+            updateDisplay();
+        }
+        
+        function trade() {
+            const outcomes = [-80, -40, 0, 40, 80, 100, 120];
+            const result = outcomes[Math.floor(Math.random() * outcomes.length)];
+            gameState.cash += result;
+            if (result > 0) {
+                log(`Stock trade +$${result} 📈`, 'positive');
+            } else {
+                log(`Stock trade -$${Math.abs(result)} 📉`, 'negative');
+            }
+            updateDisplay();
+        }
+        
+        function sideHustle() {
+            const result = Math.random() > 0.2 ? 100 : -50;
+            gameState.cash += result;
+            if (result > 0) {
+                log(`Side hustle paid off! +$${result} 🚗`, 'positive');
+            } else {
+                log(`Car trouble. -$${Math.abs(result)} 🚗🔧`, 'negative');
+            }
+            updateDisplay();
+        }
+        
+        function buyBusiness(biz, cost) {
+            if (gameState.cash < cost) return;
+            gameState.cash -= cost;
+            gameState.businesses[biz]++;
+            log(`Bought ${biz}! Now earning passive income.`, 'positive');
+            updateDisplay();
+        }
+        
+        function takeLoan(amount) {
+            gameState.cash += amount;
+            gameState.debt += amount + Math.floor(amount * 0.1);
+            log(`Took loan of $${amount}. Owe $${amount + Math.floor(amount * 0.1)} total.`, 'negative');
+            updateDisplay();
+        }
+        
+        function payDebt(amount) {
+            if (gameState.cash < amount || gameState.debt < amount) return;
+            gameState.cash -= amount;
+            gameState.debt -= amount;
+            log(`Paid off $${amount} debt!`, 'positive');
+            updateDisplay();
+        }
+        
+        function nextDay() {
+            gameState.day++;
+            
+            // Calculate income from businesses
+            let income = 0;
+            for (const [biz, count] of Object.entries(gameState.businesses)) {
+                income += count * businessIncome[biz];
+            }
+            
+            // Expenses
+            const expenses = gameState.dailyExpenses;
+            const interest = Math.floor(gameState.debt * 0.01); // 1% daily interest
+            
+            const profit = income - expenses - interest;
+            gameState.cash += profit;
+            
+            let msg = `Day ${gameState.day}: `;
+            if (profit > 0) {
+                msg += `+$${profit} profit (income: $${income}, expenses: $${expenses + interest})`;
+                log(msg, 'positive');
+            } else {
+                msg += `-$${Math.abs(profit)} loss (income: $${income}, expenses: $${expenses + interest})`;
+                log(msg, 'negative');
+            }
+            
+            // Random events (15% chance)
+            if (Math.random() < 0.15) {
+                const events = [
+                    { msg: '📦 Customer paid late. -$50 cash flow.', effect: -50 },
+                    { msg: '🎉 Referral bonus! +$100', effect: 100 },
+                    { msg: '🔧 Equipment repair. -$200', effect: -200 },
+                    { msg: '💡 Efficiency upgrade! +$150', effect: 150 },
+                    { msg: '🏠 Property tax. -$300', effect: -300 }
+                ];
+                const event = events[Math.floor(Math.random() * events.length)];
+                gameState.cash += event.effect;
+                log(event.msg, event.effect > 0 ? 'positive' : 'negative');
+            }
+            
+            // Bankruptcy check
+            if (gameState.cash < -500) {
+                log('💀 BANKRUPT! You cannot pay your debts. GAME OVER.', 'negative');
+                alert('BANKRUPT! Close this to restart.');
+                restart();
+                return;
+            }
+            
+            // Win check
+            if (gameState.cash > 100000) {
+                log('🎉 YOU WIN! Built a $100k empire!', 'event');
+                alert('🎉 CONGRATULATIONS! You built a $100k empire!');
+            }
+            
+            updateDisplay();
+        }
+        
+        function restart() {
+            gameState = {
+                cash: 500,
+                debt: 0,
+                day: 1,
+                businesses: { foodTruck: 0, laundromat: 0, store: 0, factory: 0 },
+                dailyExpenses: 50
+            };
+            document.getElementById('log').innerHTML = '';
+            log('Fresh start! $500 and big dreams.', 'event');
+            updateDisplay();
+        }
+        
+        // Initialize
+        log('Welcome! Start with $500. Build businesses, avoid debt.', 'event');
+        updateDisplay();
+    </script>
+    
+    <h3>💥 Disasters & Events</h3>
+    <div class="actions">
+        <button onclick="triggerDisaster('theft')">🎭 Test: Theft (-$500)</button>
+        <button onclick="triggerDisaster('recession')">📉 Test: Recession (halves income)</button>
+        <button onclick="triggerDisaster('fire')">🔥 Test: Fire (loses random business)</button>
+    </div>
+    
+    <h3>🏆 Achievements</h3>
+    <div id="achievements" style="color: #888; font-size: 14px;">
+        <div>💰 First $1,000</div>
+        <div>🏪 First Business</div>
+        <div>💵 First $10,000</div>
+        <div>🏭 First Factory</div>
+        <div>🎉 $100k Empire</div>
+    </div>
+    
+    <h3>🎯 Cheats (testing only!)</h3>
+    <div class="actions">
+        <button onclick="cheat('cash', 1000)">+ $1,000 cash</button>
+        <button onclick="cheat('cash', 5000)">+ $5,000 cash</button>
+        <button onclick="cheat('cash', 10000)">+ $10,000 cash</button>
+    </div>
+    
+    <script>
+        let achievements = {
+            first1k: false,
+            firstBusiness: false,
+            first10k: false,
+            firstFactory: false,
+            hundredk: false
+        };
+        
+        function checkAchievements() {
+            const achEl = document.getElementById('achievements');
+            let html = '';
+            
+            if (gameState.cash >= 1000) achievements.first1k = true;
+            html += achievements.first1k ? '<div style="color:#ffaa00">💰 First $1,000 ✅</div>' : '<div>💰 First $1,000</div>';
+            
+            if (gameState.businesses.foodTruck > 0 || gameState.businesses.laundromat > 0) achievements.firstBusiness = true;
+            html += achievements.firstBusiness ? '<div style="color:#ffaa00">🏪 First Business ✅</div>' : '<div>🏪 First Business</div>';
+            
+            if (gameState.cash >= 10000) achievements.first10k = true;
+            html += achievements.first10k ? '<div style="color:#ffaa00">💵 First $10,000 ✅</div>' : '<div>💵 First $10,000</div>';
+            
+            if (gameState.businesses.factory > 0) achievements.firstFactory = true;
+            html += achievements.firstFactory ? '<div style="color:#ffaa00">🏭 First Factory ✅</div>' : '<div>🏭 First Factory</div>';
+            
+            if (gameState.cash >= 100000) achievements.hundredk = true;
+            html += achievements.hundredk ? '<div style="color:#ffaa00">🎉 $100k Empire ✅ YOU WIN!</div>' : '<div>🎉 $100k Empire</div>';
+            
+            achEl.innerHTML = html;
+        }
+        
+        function triggerDisaster(type) {
+            if (type === 'theft') {
+                gameState.cash = Math.max(0, gameState.cash - 500);
+                log('🚨 THEFT! Someone stole $500!', 'negative');
+            } else if (type === 'recession') {
+                for (const biz of Object.keys(gameState.businesses)) {
+                    gameState.businesses[biz] = Math.floor(gameState.businesses[biz] / 2);
+                }
+                log('📉 RECESSION! Income halved!', 'negative');
+            } else if (type === 'fire') {
+                const businesses = Object.keys(gameState.businesses).filter(b => gameState.businesses[b] > 0);
+                if (businesses.length > 0) {
+                    const biz = businesses[Math.floor(Math.random() * businesses.length)];
+                    gameState.businesses[biz]--;
+                    log('🔥 FIRE! Lost your ' + biz + '!', 'negative');
+                }
+            }
+            updateDisplay();
+        }
+        
+        function cheat(type, amount) {
+            if (type === 'cash') {
+                gameState.cash += amount;
+                log('💰 Cheated in $' + amount + '! (shh)', 'event');
+            }
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
