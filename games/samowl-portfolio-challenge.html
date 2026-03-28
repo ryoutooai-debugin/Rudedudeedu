@@ -516,16 +516,25 @@
 
         let currentTrade = { symbol: '', action: '', price: 0 };
 
-        // Stock data with simulated prices
+        // Stock data - prices updated via price.json
         const stocks = [
-            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 175.50 },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 142.30 },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 380.25 },
-            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 178.90 },
-            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 205.60 },
-            { symbol: 'META', name: 'Meta Platforms', basePrice: 505.75 },
-            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 890.15 },
-            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 625.40 }
+            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 252.89 },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 280.97 },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 365.97 },
+            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 207.68 },
+            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 372.11 },
+            { symbol: 'META', name: 'Meta Platforms', basePrice: 547.75 },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 171.24 },
+            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 93.32 },
+            { symbol: 'OXY', name: 'Occidental Petroleum', basePrice: 64.36 },
+            { symbol: 'CVX', name: 'Chevron Corp.', basePrice: 207.79 },
+            { symbol: 'AMD', name: 'AMD Inc.', basePrice: 203.77 },
+            { symbol: 'JPM', name: 'JPMorgan Chase', basePrice: 291.66 },
+            { symbol: 'V', name: 'Visa Inc.', basePrice: 305.53 },
+            { symbol: 'JNJ', name: 'Johnson & Johnson', basePrice: 239.24 },
+            { symbol: 'UNH', name: 'UnitedHealth Group', basePrice: 268.05 },
+            { symbol: 'HD', name: 'Home Depot', basePrice: 328.43 },
+            { symbol: 'PG', name: 'Procter & Gamble', basePrice: 142.42 }
         ];
 
         // Load saved game
