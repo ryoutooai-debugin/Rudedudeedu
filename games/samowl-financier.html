@@ -245,6 +245,12 @@
     </div>
 
     <script>
+        // === STOCK PRICES (loaded from price.json) ===
+        let stockPrices = {
+            'AAPL': 252.89, 'GOOGL': 280.97, 'MSFT': 365.97, 'AMZN': 207.68,
+            'TSLA': 372.11, 'META': 547.75, 'NVDA': 171.24, 'NFLX': 93.32
+        };
+        
         // === GAME CONFIG ===
         const businessTypes = [
             { id: 'foodtruck', name: '🌮 Food Truck', cost: 1000, income: 50, expense: 20, unlock: 0 },
@@ -292,11 +298,17 @@
             saveGame();
             updateAll();
             
+            // Load real stock prices on start
+            loadStockPrices();
+            
             // Daily cycle every 10 seconds
             setInterval(() => {
                 gameState.day++;
                 processDay();
             }, 10000);
+            
+            // Stock price update every 30 seconds (market moves!)
+            setInterval(loadStockPrices, 30000);
         }
         
         function processDay() {
@@ -438,7 +450,12 @@
                     if (biz) bizValue += biz.cost;
                 }
             }
-            const netWorth = gameState.cash + gameState.savings + bizValue + gameState.retirement - gameState.debt;
+            // Stock portfolio value
+            let stockValue = 0;
+            for (const [symbol, shares] of Object.entries(gameState.stockPortfolio)) {
+                stockValue += shares * (stockPrices[symbol] || 0);
+            }
+            const netWorth = gameState.cash + gameState.savings + bizValue + stockValue + gameState.retirement - gameState.debt;
             
             document.getElementById('netWorth').textContent = `$${netWorth.toLocaleString()}`;
             document.getElementById('cash').textContent = `$${gameState.cash.toLocaleString()}`;
@@ -528,14 +545,59 @@
         
         function renderStocks() {
             const list = document.getElementById('stocksList');
-            const stocks = ['AAPL','GOOGL','MSFT','AMZN','TSLA','META','NVDA','NFLX'];
-            list.innerHTML = stocks.map(s => `
-                <div class="account-item">
-                    <div class="account-name">${s}</div>
-                    <div class="account-value">📈 Real-time</div>
-                </div>
-            `).join('');
-            list.innerHTML += `<p style="font-size:0.75rem; color:#aaa; margin-top:8px;">Stocks coming soon! Use cash to invest.</p>`;
+            const stocks = Object.keys(stockPrices);
+            
+            list.innerHTML = stocks.map(s => {
+                const owned = gameState.stockPortfolio[s] || 0;
+                const price = stockPrices[s];
+                const value = owned * price;
+                return `
+                    <div class="account-item" style="flex-wrap:wrap;">
+                        <div class="account-name">${s}</div>
+                        <div class="account-name" style="color:#aaa; font-size:0.8rem;">$${price}</div>
+                        <div class="account-name" style="color:#4CAF50;">${owned} shares = $${value.toLocaleString()}</div>
+                        <div class="action-btns">
+                            <button class="btn" onclick="buyStock('${s}')">Buy</button>
+                            <button class="btn" onclick="sellStock('${s}')" ${owned<=0?'disabled':''}>Sell</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function loadStockPrices() {
+            try {
+                const response = await fetch('price.json');
+                const prices = await response.json();
+                stockPrices = { ...stockPrices, ...prices };
+            } catch (e) { console.log('Using default stock prices'); }
+        }
+        
+        function buyStock(symbol) {
+            const price = stockPrices[symbol];
+            const maxShares = Math.floor(gameState.cash / price);
+            const shares = parseInt(prompt(`Price: $${price}\nMax you can buy: ${maxShares}\nHow many shares to buy?`));
+            if (shares > 0 && shares <= maxShares) {
+                gameState.cash -= shares * price;
+                gameState.stockPortfolio[symbol] = (gameState.stockPortfolio[symbol] || 0) + shares;
+                addNews(`📈 Bought ${shares} shares of ${symbol} for $${(shares*price).toLocaleString()}`, 'positive');
+                saveGame();
+                updateAll();
+            }
+        }
+        
+        function sellStock(symbol) {
+            const owned = gameState.stockPortfolio[symbol] || 0;
+            const price = stockPrices[symbol];
+            const shares = parseInt(prompt(`You own: ${owned} shares\nPrice: $${price}\nHow many to sell?`));
+            if (shares > 0 && shares <= owned) {
+                gameState.cash += shares * price;
+                gameState.stockPortfolio[symbol] -= shares;
+                if (gameState.stockPortfolio[symbol] <= 0) delete gameState.stockPortfolio[symbol];
+                addNews(`📉 Sold ${shares} shares of ${symbol} for $${(shares*price).toLocaleString()}`, shares*price > 0 ? 'positive' : 'negative');
+                saveGame();
+                updateAll();
+            }
         }
         
         function addNews(text, type='neutral') {
