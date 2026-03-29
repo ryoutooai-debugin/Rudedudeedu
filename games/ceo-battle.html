@@ -110,13 +110,23 @@
  color: #aaa;
  }
 
+ /* Token styling */
  .token {
  position: absolute;
- width: 36px; height: 36px;
+ width: 28px; height: 28px;
  display: flex; align-items: center; justify-content: center;
- font-size: 26px; z-index: 40;
- transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
- filter: drop-shadow(0 0 12px var(--accent));
+ font-size: 20px; z-index: 40;
+ transition: all 0.3s ease;
+ filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+ }
+ 
+ .token::after {
+ content: '';
+ position: absolute;
+ width: 100%; height: 100%;
+ border-radius: 50%;
+ border: 2px solid currentColor;
+ opacity: 0.6;
  }
 
  /* SIDE PANEL */
@@ -505,6 +515,37 @@
  el.dataset.id = space.id;
  board.appendChild(el);
  });
+ 
+ // Create tokens for all players (will be positioned after game starts)
+ allPlayers.forEach((p, idx) => {
+ const token = document.createElement('div');
+ token.className = 'token';
+ token.id = `token-${p.id}`;
+ token.textContent = p.emoji;
+ token.style.color = p.color;
+ token.style.left = '270px';
+ token.style.top = '270px';
+ board.appendChild(token);
+ });
+ }
+ 
+ function updateTokenPosition(player) {
+ const token = document.getElementById(`token-${player.id}`);
+ if (!token) return;
+ 
+ const radius = 225, centerX = 290, centerY = 290;
+ const angleDeg = (player.position * (360 / 24)) - 90;
+ const angleRad = angleDeg * Math.PI / 180;
+ const x = centerX + radius * Math.cos(angleRad);
+ const y = centerY + radius * Math.sin(angleRad);
+ 
+ // Offset multiple tokens on same space
+ const playersOnSpace = allPlayers.filter(p => p.position === player.position);
+ const offsetIdx = playersOnSpace.indexOf(player);
+ const offset = (offsetIdx - 1) * 8;
+ 
+ token.style.left = `${x - 14 + offset}px`;
+ token.style.top = `${y - 14}px`;
  }
 
  // ==================== MODE SELECTION ====================
@@ -591,6 +632,7 @@
 
  createBoard();
  renderPlayerList();
+ updateAllTokenPositions();
  currentPlayerIndex = 0;
  updateTurnIndicator();
  rollBtn.disabled = !allPlayers[0].isHuman;
@@ -601,9 +643,10 @@
  playerListEl.innerHTML = allPlayers.map((p, i) => `
  <div class="player-item" style="border-left: 4px solid ${p.color}">
  <span style="font-size:22px">${p.emoji}</span>
- <div>
+ <div style="flex:1">
  <strong>${p.name}</strong> ${p.isHuman ? '' : '(AI)'}<br>
- <small>$${p.cash.toLocaleString()}</small>
+ <small style="color:#00ff9d">$${p.cash.toLocaleString()}</small>
+ ${p.properties.length > 0 ? `<small style="color:#fbbf24"> • ${p.properties.length} properties</small>` : ''}
  </div>
  </div>
  `).join('');
@@ -622,10 +665,17 @@
  isMoving = true;
  for (let i = 0; i < steps; i++) {
  player.position = (player.position + 1) % 24;
- await new Promise(r => setTimeout(r, 150));
+ updateTokenPosition(player);
+ await new Promise(r => setTimeout(r, 180));
  }
+ // Final position update
+ updateTokenPosition(player);
  handleLanding(player);
  isMoving = false;
+ }
+ 
+ function updateAllTokenPositions() {
+ allPlayers.forEach(p => updateTokenPosition(p));
  }
 
  function rollDice() {
