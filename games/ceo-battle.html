@@ -384,9 +384,9 @@
  <div class="characters-grid" id="characters-grid"></div>
  </div>
 
- <!-- ACTIVE PLAYERS -->
- <div class="panel">
- <h3>ACTIVE PLAYERS</h3>
+ <!-- PLAYER DETAILS -->
+ <div class="panel" style="max-height:320px">
+ <h3>🎯 PLAYER DETAILS</h3>
  <div class="player-list" id="player-list"></div>
  </div>
 
@@ -663,10 +663,19 @@
  // ==================== MOVEMENT & TURN LOGIC ====================
  async function moveToken(steps, player) {
  isMoving = true;
+ const oldPosition = player.position;
+ 
  for (let i = 0; i < steps; i++) {
  player.position = (player.position + 1) % 24;
  updateTokenPosition(player);
  await new Promise(r => setTimeout(r, 180));
+ 
+ // Check if passed CEO HQ (space 0)
+ if (player.position === 0 && oldPosition !== 0) {
+ player.cash += 200;
+ logEl.innerHTML += `${player.emoji} Passed CEO HQ! Earned <strong style="color:#00ff9d">$200</strong>!<br>`;
+ }
+ oldPosition = player.position;
  }
  // Final position update
  updateTokenPosition(player);
@@ -678,10 +687,13 @@
  allPlayers.forEach(p => updateTokenPosition(p));
  }
 
- function rollDice() {
- const currentPlayer = allPlayers[currentPlayerIndex];
- if (!currentPlayer.isHuman || isMoving || gameOver) return;
+ let canRoll = true;
 
+function rollDice() {
+ const currentPlayer = allPlayers[currentPlayerIndex];
+ if (!currentPlayer.isHuman || isMoving || gameOver || !canRoll) return;
+
+ canRoll = false;
  rollBtn.disabled = true;
  let count = 0;
  const interval = setInterval(() => {
@@ -694,6 +706,7 @@
  document.getElementById('roll-result').innerHTML = `🎲 <strong>${total}</strong>`;
  logEl.innerHTML += `${currentPlayer.emoji} ${currentPlayer.name} rolled <strong>${total}</strong>!<br>`;
  moveToken(total, currentPlayer).then(() => {
+ canRoll = true;
  rollBtn.disabled = false;
  });
  }
@@ -727,6 +740,22 @@
  logEl.innerHTML += `Drew a card!<br>`;
  player.cash += Math.random() > 0.5 ? 12000 : -8000;
  actionContent.innerHTML = `<button class="action-btn pass-btn" onclick="endTurn()">CONTINUE</button>`;
+ } else if (space.type === "gotojail") {
+ // Go to jail - move to space 12
+ player.position = 12;
+ updateTokenPosition(player);
+ logEl.innerHTML += `${player.emoji} went to JAIL!<br>`;
+ actionContent.innerHTML = `<button class="action-btn pass-btn" onclick="endTurn()">CONTINUE</button>`;
+ } else if (player.cash < 0) {
+ // Player is in debt jail - must roll high to get out or pay
+ const rollNeeded = Math.floor(Math.random() * 4) + 4; // 4-7
+ actionContent.innerHTML = `
+ <p style="color:#ef4444">🚨 IN DEBT JAIL!</p>
+ <p>Roll <strong>${rollNeeded}+</strong> to get out free!</p>
+ <p>Or pay <strong>$${Math.abs(player.cash)}</strong> to settle debt</p>
+ <button class="action-btn buy-btn" onclick="payDebtToGetOut()">PAY DEBT ($${Math.abs(player.cash)})</button>
+ <button class="action-btn pass-btn" onclick="rollForJail(${rollNeeded})">ROLL FOR FREEDOM</button>
+ `;
  } else {
  actionContent.innerHTML = `<button class="action-btn pass-btn" onclick="endTurn()">END TURN</button>`;
  }
@@ -755,6 +784,27 @@
  current.cash -= cost;
  space.buildings++;
  logEl.innerHTML += `${current.emoji} upgraded ${space.name}!<br>`;
+ }
+ endTurn();
+ };
+
+ window.payDebtToGetOut = function() {
+ const player = allPlayers[currentPlayerIndex];
+ const debtAmount = Math.abs(player.cash);
+ player.cash = 0; // Pay off all debt
+ logEl.innerHTML += `${player.emoji} paid $${debtAmount} to settle debt and get out of jail!<br>`;
+ endTurn();
+ };
+
+ window.rollForJail = function(rollNeeded) {
+ const roll = Math.floor(Math.random() * 6) + 1 + (Math.floor(Math.random() * 6) + 1); // 2-12
+ logEl.innerHTML += `${allPlayers[currentPlayerIndex].emoji} rolled ${roll} (need ${rollNeeded}+)...<br>`;
+ if (roll >= rollNeeded) {
+ logEl.innerHTML += `<strong style="color:#00ff9d">FREEDOM!</strong> Got out of jail free!<br>`;
+ } else {
+ const debtAmount = Math.abs(allPlayers[currentPlayerIndex].cash);
+ allPlayers[currentPlayerIndex].cash = 0;
+ logEl.innerHTML += `Stayed in jail. Paid $${debtAmount} debt.<br>`;
  }
  endTurn();
  };
