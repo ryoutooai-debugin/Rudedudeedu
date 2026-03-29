@@ -3,571 +3,851 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🦉 Financier: Swap Meet Tycoon</title>
+    <title>🦉 Financier Tycoon • Empire Builder</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f1629 0%, #1a2340 100%);
+            color: #e0e7ff;
             min-height: 100vh;
-            color: #fff;
-            padding-bottom: 20px;
+            padding-bottom: 30px;
         }
         .header {
-            background: linear-gradient(90deg, #0f0f23 0%, #1a1a2e 100%);
-            padding: 15px 20px;
-            border-bottom: 3px solid #ffd700;
+            background: linear-gradient(90deg, #0c1324 0%, #1a2340 100%);
+            padding: 18px 25px;
+            border-bottom: 4px solid #ffd700;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .header h1 { font-size: 1.55rem; color: #ffd700; }
-        .stats { display: flex; gap: 12px; flex-wrap: wrap; }
+        .header h1 {
+            font-size: 1.85rem;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
         .stat-box {
-            background: rgba(255, 215, 0, 0.15);
+            background: rgba(255,215,0,0.12);
             border: 2px solid #ffd700;
-            border-radius: 8px;
-            padding: 10px 16px;
+            border-radius: 12px;
+            padding: 12px 20px;
             text-align: center;
-            min-width: 115px;
+            min-width: 128px;
+            box-shadow: 0 2px 8px rgba(255,215,0,0.2);
         }
-        .stat-label { font-size: 0.75rem; color: #ddd; }
-        .stat-value { font-size: 1.25rem; font-weight: bold; color: #ffd700; }
-
+        .stat-label { font-size: 0.78rem; color: #b8c5ff; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.45rem; font-weight: 700; color: #ffd700; }
         .debt-warning {
-            background: linear-gradient(90deg, #ff8800, #cc5500);
-            padding: 12px;
+            background: linear-gradient(90deg, #ff3b5c, #c81e3d);
+            padding: 14px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 1.1rem;
             display: none;
+            box-shadow: 0 0 15px rgba(255,59,92,0.6);
         }
         .debt-warning.active { display: block; }
-
         .container {
             display: grid;
-            grid-template-columns: 1fr 1fr 340px;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1450px;
+            grid-template-columns: 1fr 1fr 360px;
+            gap: 24px;
+            padding: 25px;
+            max-width: 1520px;
             margin: 0 auto;
         }
-        @media (max-width: 1100px) { .container { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
-
+        @media (max-width: 1150px) { .container { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
         .card {
-            background: rgba(255, 255, 255, 0.07);
-            border-radius: 12px;
-            padding: 18px;
-            border: 1px solid rgba(255, 215, 0, 0.25);
+            background: rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid rgba(255,215,0,0.25);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
         }
         .card h2 {
             color: #ffd700;
-            margin-bottom: 15px;
-            border-bottom: 2px solid rgba(255, 215, 0, 0.4);
+            margin-bottom: 18px;
+            font-size: 1.35rem;
+            border-bottom: 2px solid rgba(255,215,0,0.3);
             padding-bottom: 10px;
         }
-
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
         .tab {
-            background: rgba(255, 215, 0, 0.12);
+            background: rgba(255,215,0,0.1);
             border: 2px solid #ffd700;
             color: #ffd700;
-            padding: 10px 16px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.2s;
         }
-        .tab.active, .tab:hover { background: #ffd700; color: #1a1a2e; }
-
-        .biz-grid { display: grid; gap: 12px; }
+        .tab.active, .tab:hover {
+            background: #ffd700;
+            color: #0f1629;
+        }
+        .biz-grid {
+            display: grid;
+            gap: 14px;
+        }
         .biz-item {
-            background: rgba(0,0,0,0.4);
-            border-radius: 10px;
-            padding: 14px;
+            background: rgba(15,22,41,0.7);
+            border-radius: 14px;
+            padding: 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 5px solid #4CAF50;
+            border-left: 6px solid #4ade80;
+            transition: transform 0.2s;
         }
-
+        .biz-item:hover { transform: translateY(-2px); }
         .btn {
             background: #ffd700;
-            color: #1a1a2e;
+            color: #0f1629;
             border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: bold;
-            margin: 4px 2px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s;
         }
-        .btn:hover:not(:disabled) { background: #ffed4e; }
-        .btn.small { padding: 6px 12px; font-size: 0.9rem; }
-        .btn.danger { background: #ff4444; color: white; }
-        .btn.save { background: #4CAF50; color: white; }
-
+        .btn:hover:not(:disabled) { background: #ffed4e; transform: scale(1.05); }
+        .btn.small { padding: 8px 16px; font-size: 0.9rem; border-radius: 50px; }
+        .btn.danger { background: #ff3b5c; color: white; }
+        .btn.save { background: #4ade80; color: #0f1629; }
         .news-ticker {
-            background: rgba(0,0,0,0.45);
-            border-radius: 10px;
-            padding: 12px;
-            max-height: 240px;
+            background: rgba(15,22,41,0.6);
+            border-radius: 14px;
+            padding: 16px;
+            max-height: 340px;
             overflow-y: auto;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
         }
-        .news-item { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .news-positive { color: #4CAF50; }
-        .news-negative { color: #ff6666; }
-
+        .news-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.95rem;
+        }
+        .news-positive { color: #4ade80; }
+        .news-negative { color: #ff6b6b; }
+        .news-daily { background: rgba(255,215,0,0.15); border-radius: 8px; padding: 8px; margin: 8px 0; font-size: 0.9rem; }
         .save-bar {
-            background: rgba(255,215,0,0.15);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
+            background: rgba(255,215,0,0.1);
+            padding: 14px;
+            border-radius: 12px;
+            margin: 18px 0;
             text-align: center;
-            font-size: 0.9rem;
+        }
+        .upgrade-bar {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: rgba(255,215,0,0.2);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
 <body>
-
-<div id="startScreen" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;">
-    <h1 style="color:#ffd700;font-size:2.8rem;">🦉 Financier: Swap Meet Tycoon</h1>
-    <p style="max-width:520px;text-align:center;margin:20px 0;color:#ccc;">Work a job • Do side hustles • Day trade • Buy businesses • Manage debt • Save for disasters</p>
-    <input type="text" id="playerNameInput" placeholder="Your name" value="Alex Rivera" style="padding:15px;font-size:1.1rem;border:3px solid #ffd700;background:rgba(255,255,255,0.1);color:white;width:290px;border-radius:10px;margin-bottom:25px;">
-    <button class="btn" onclick="startGame()" style="font-size:1.4rem;padding:16px 60px;background:#4CAF50;color:white;">START MY EMPIRE</button>
-</div>
-
-<div class="header">
-    <h1>🦉 Financier: Swap Meet Tycoon</h1>
-    <div class="stats">
-        <div class="stat-box"><div class="stat-label">NET WORTH</div><div class="stat-value" id="netWorth">$0</div></div>
-        <div class="stat-box"><div class="stat-label">CASH</div><div class="stat-value" id="cash">$0</div></div>
-        <div class="stat-box"><div class="stat-label">SAVINGS</div><div class="stat-value" id="savings">$0</div></div>
-        <div class="stat-box"><div class="stat-label">DAY</div><div class="stat-value" id="day">1</div></div>
-    </div>
-</div>
-
-<div class="debt-warning" id="debtWarning">⚠️ You have debt — 10% interest accrues daily</div>
-
-<div class="container">
-
-    <!-- Active Income -->
-    <div class="card">
-        <h2>💼 Active Income</h2>
-        <div style="background:rgba(0,0,0,0.3);padding:14px;border-radius:8px;margin-bottom:15px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <div>Job: <strong>$50/day</strong></div>
-                <button class="btn small" id="quitJobBtn" onclick="quitJob()">Quit Job</button>
-            </div>
-            <button class="btn" onclick="doSideHustle()" style="background:#2196F3;color:white;width:100%;">🚗 Side Hustle (Costs $25)</button>
-            <button class="btn" onclick="dayTrade()" style="background:#9C27B0;color:white;width:100%;margin-top:6px;">📈 Day Trade Stocks (±$100)</button>
-        </div>
-
-        <h2>🏪 My Businesses</h2>
-        <div class="biz-grid" id="bizList"></div>
+    <!-- START SCREEN -->
+    <div id="startScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#0f1629,#1a2340);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;">
+        <h1 style="color:#ffd700;font-size:3.2rem;margin-bottom:12px;">🦉 Financier Tycoon</h1>
+        <p style="font-size:1.3rem;color:#b8c5ff;max-width:560px;text-align:center;line-height:1.4;">The ultimate financial literacy game.<br>Buy 1 at a time • Upgrade your empire • Watch every dollar in the Daily Tracker</p>
+        <input type="text" id="playerNameInput" placeholder="Your name" value="Alex Rivera" style="margin-top:30px;padding:18px 28px;font-size:1.25rem;border:4px solid #ffd700;background:rgba(255,255,255,0.1);color:#fff;width:340px;border-radius:9999px;text-align:center;">
+        <button onclick="startGame()" class="btn" style="margin-top:30px;font-size:1.6rem;padding:20px 80px;border-radius:9999px;background:#4ade80;color:#0f1629;">BUILD MY EMPIRE</button>
     </div>
 
-    <!-- Financial Hub -->
-    <div class="card">
-        <h2>💰 Financial Hub</h2>
-        <div class="tabs">
-            <button class="tab active" onclick="switchFinTab('businesses')">Buy Businesses</button>
-            <button class="tab" onclick="switchFinTab('accounts')">Accounts & Loans</button>
-            <button class="tab" onclick="switchFinTab('stocks')">Stocks</button>
-        </div>
-
-        <div id="bizTab">
-            <div class="biz-grid" id="buyBizList"></div>
-        </div>
-
-        <div id="accountsTab" style="display:none;">
-            <div id="accountsList" class="biz-grid"></div>
-            <div style="margin-top:15px;">
-                <button class="btn" onclick="transferToSavings()">Deposit to Savings</button>
-                <button class="btn" onclick="withdrawFromSavings()">Withdraw from Savings</button>
-                <button class="btn" onclick="takeLoan()" style="background:#ff9800;">💳 Borrow $500 (10% daily)</button>
-            </div>
-        </div>
-
-        <div id="stocksTab" style="display:none;">
-            <div id="stocksList" class="biz-grid"></div>
+    <!-- HEADER -->
+    <div class="header">
+        <h1>🦉 Financier Tycoon</h1>
+        <div class="stats">
+            <div class="stat-box"><div class="stat-label">NET WORTH</div><div class="stat-value" id="netWorth">$0</div></div>
+            <div class="stat-box"><div class="stat-label">CASH</div><div class="stat-value" id="cash">$0</div></div>
+            <div class="stat-box"><div class="stat-label">HIGH-YIELD SAVINGS</div><div class="stat-value" id="savings">$0</div></div>
+            <div class="stat-box"><div class="stat-label">DAY</div><div class="stat-value" id="day">1</div></div>
+            <div class="stat-box"><div class="stat-label">PASSIVE INCOME</div><div class="stat-value" id="passiveIncome">$0/day</div></div>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="card" style="grid-row: span 2;">
-        <h2>📰 News Feed</h2>
-        <div class="news-ticker" id="newsTicker"></div>
+    <div class="debt-warning" id="debtWarning">⚠️ DEBT ALERT — 10% daily interest is crushing your empire</div>
 
-        <div class="save-bar">
-            <button class="btn save" onclick="saveGameFile()">💾 Save Progress</button>
-            <button class="btn" onclick="loadGameFile()" style="background:#2196F3;color:white;">📂 Load Progress</button>
-            <input type="file" id="loadFile" accept=".json" style="display:none;" onchange="handleFileLoad(event)">
-        </div>
-
-        <h2 style="margin-top:20px;">⚙️ Controls</h2>
-        <button class="btn" onclick="nextDay()" style="background:#2196F3;color:white;width:100%;margin-bottom:8px;">Advance 1 Day</button>
-        <button class="btn danger" onclick="resetGame()" style="width:100%;">Reset Game</button>
-    </div>
-</div>
-
-<script>
-// ==================== GAME STATE ====================
-let gameState = {
-    playerName: '',
-    cash: 600,
-    savings: 300,
-    debt: 0,
-    day: 1,
-    hasJob: true,
-    businesses: {},
-    stockPortfolio: {},
-    lastDisasterDay: 0
-};
-
-const SAVINGS_DAILY_RATE = 0.0003;
-
-const businessTypes = [
-    { id: 'foodtruck', name: '🍔 Food Truck', cost: 500, income: 50, expense: 25 },
-    { id: 'laundromat', name: '🧺 Laundromat', cost: 2000, income: 200, expense: 75 },
-    { id: 'store', name: '🏪 Corner Store', cost: 5000, income: 500, expense: 175 },
-    { id: 'factory', name: '🏭 Small Factory', cost: 15000, income: 1500, expense: 500 }
-];
-
-let stockPrices = { 'AAPL': 228, 'TSLA': 342, 'NVDA': 139, 'AMZN': 198 };
-
-// ==================== CORE GAME ====================
-function startGame() {
-    const name = document.getElementById('playerNameInput').value.trim() || 'Tycoon';
-    gameState.playerName = name;
-    document.getElementById('startScreen').style.display = 'none';
-    
-    updateAll();
-    addNews(`Welcome, ${name}! You start with a $50/day job.`, 'positive');
-    
-    setInterval(() => { gameState.day++; processDay(); }, 8000);
-    setInterval(updateStockPrices, 22000);
-}
-
-function processDay() {
-    let net = gameState.hasJob ? 50 : 0;
-
-    Object.keys(gameState.businesses).forEach(id => {
-        if (gameState.businesses[id].owned) {
-            const biz = businessTypes.find(b => b.id === id);
-            if (biz) net += biz.income - biz.expense;
-        }
-    });
-
-    gameState.cash += net;
-
-    // Savings interest
-    if (gameState.savings > 0) {
-        const interest = Math.floor(gameState.savings * SAVINGS_DAILY_RATE);
-        gameState.savings += interest;
-        if (interest > 0) addNews(`🏦 Savings earned $${interest} interest`, 'positive');
-    }
-
-    // Debt interest
-    if (gameState.debt > 0) {
-        const interest = Math.floor(gameState.debt * 0.10);
-        gameState.debt += interest;
-        addNews(`💳 Loan interest: $${interest}`, 'negative');
-    }
-
-    // Rare disaster
-    if (gameState.day - gameState.lastDisasterDay > 30 && Math.random() < 0.022) {
-        triggerDisaster();
-        gameState.lastDisasterDay = gameState.day;
-    }
-
-    if (gameState.cash < -200) {
-        gameState.debt += Math.abs(gameState.cash) + 100;
-        gameState.cash = 30;
-    }
-
-    updateAll();
-}
-
-function triggerDisaster() {
-    const cost = [400, 800, 1200, 1600][Math.floor(Math.random()*4)];
-    if (gameState.savings >= cost) {
-        gameState.savings -= cost;
-        addNews(`🏚️ Disaster covered from savings (-$${cost})`, 'negative');
-    } else if (gameState.cash >= cost) {
-        gameState.cash -= cost;
-        addNews(`🏚️ Disaster paid from cash (-$${cost})`, 'negative');
-    } else {
-        const shortfall = cost - Math.max(gameState.cash, 0);
-        gameState.cash = 0;
-        gameState.debt += shortfall;
-        addNews(`🏚️ Disaster! Took $${shortfall} debt`, 'negative');
-    }
-}
-
-// ==================== ACTIONS ====================
-function quitJob() {
-    if (!gameState.hasJob || !confirm("Quit your job?")) return;
-    gameState.hasJob = false;
-    addNews("You quit your job. No more $50/day income.", 'neutral');
-    updateAll();
-}
-
-function doSideHustle() {
-    if (gameState.cash < 25) return alert("You need $25 for the side hustle.");
-    gameState.cash -= 25;
-    const earnings = Math.floor(Math.random() * 201) - 50;
-    gameState.cash += earnings;
-    addNews(`🚗 Side Hustle: ${earnings >= 0 ? '+' : ''}$${earnings}`, earnings >= 0 ? 'positive' : 'negative');
-    updateAll();
-}
-
-function dayTrade() {
-    const result = Math.floor(Math.random() * 201) - 100;
-    gameState.cash += result;
-    addNews(`📈 Day Trade result: ${result >= 0 ? '+' : ''}$${result}`, result >= 0 ? 'positive' : 'negative');
-    updateAll();
-}
-
-function takeLoan() {
-    gameState.cash += 500;
-    gameState.debt += 500;
-    addNews(`💳 Borrowed $500 at 10% daily interest`, 'negative');
-    updateAll();
-}
-
-function payLoan() {
-    if (gameState.debt <= 0) return alert("No debt to pay.");
-    const amt = parseInt(prompt(`Current debt: $${gameState.debt}\nHow much to pay?`, "200"));
-    if (amt > 0 && amt <= gameState.cash && amt <= gameState.debt) {
-        gameState.cash -= amt;
-        gameState.debt -= amt;
-        addNews(`💳 Paid $${amt} toward loan`, 'positive');
-        updateAll();
-    }
-}
-
-function buyBusiness(id) {
-    const biz = businessTypes.find(b => b.id === id);
-    if (!biz || gameState.businesses[id]?.owned) return;
-    if (gameState.cash < biz.cost) return alert(`Need $${biz.cost} to buy this business.`);
-    
-    gameState.cash -= biz.cost;
-    gameState.businesses[id] = { owned: true };
-    addNews(`🏪 Purchased ${biz.name} for $${biz.cost}`, 'positive');
-    updateAll();
-}
-
-// Savings
-function transferToSavings() {
-    const amt = parseInt(prompt(`Cash: $${gameState.cash}\nHow much to deposit?`, "300"));
-    if (amt > 0 && amt <= gameState.cash) {
-        gameState.cash -= amt;
-        gameState.savings += amt;
-        addNews(`💰 Deposited $${amt} to savings`, 'positive');
-        updateAll();
-    }
-}
-
-function withdrawFromSavings() {
-    const amt = parseInt(prompt(`Savings: $${gameState.savings}\nHow much to withdraw?`, "200"));
-    if (amt > 0 && amt <= gameState.savings) {
-        gameState.savings -= amt;
-        gameState.cash += amt;
-        addNews(`🏦 Withdrew $${amt} from savings`, 'neutral');
-        updateAll();
-    }
-}
-
-// Stocks
-function updateStockPrices() {
-    Object.keys(stockPrices).forEach(k => {
-        stockPrices[k] = Math.max(50, Math.round(stockPrices[k] * (0.96 + Math.random() * 0.09)));
-    });
-    if (document.getElementById('stocksTab').style.display !== 'none') renderStocks();
-}
-
-function buyStock(sym) {
-    const price = stockPrices[sym];
-    const shares = parseInt(prompt(`$${sym} @ $${price}\nHow many shares to buy?`, "1"));
-    if (shares > 0 && shares * price <= gameState.cash) {
-        gameState.cash -= shares * price;
-        gameState.stockPortfolio[sym] = (gameState.stockPortfolio[sym] || 0) + shares;
-        addNews(`📈 Bought ${shares} shares of ${sym}`, 'positive');
-        updateAll();
-    }
-}
-
-function sellStock(sym) {
-    const owned = gameState.stockPortfolio[sym] || 0;
-    if (owned === 0) return;
-    const price = stockPrices[sym];
-    const shares = parseInt(prompt(`You own ${owned} shares of ${sym} @ $${price}\nHow many to sell?`, "1"));
-    if (shares > 0 && shares <= owned) {
-        gameState.cash += shares * price;
-        gameState.stockPortfolio[sym] -= shares;
-        if (gameState.stockPortfolio[sym] <= 0) delete gameState.stockPortfolio[sym];
-        addNews(`📉 Sold ${shares} shares of ${sym}`, 'positive');
-        updateAll();
-    }
-}
-
-// ==================== SAVE / LOAD ====================
-function saveGameFile() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `tycoon-save-${gameState.day}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    addNews("💾 Progress saved to file!", 'positive');
-}
-
-function loadGameFile() {
-    document.getElementById('loadFile').click();
-}
-
-function handleFileLoad(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        try {
-            const loaded = JSON.parse(event.target.result);
-            gameState = { ...gameState, ...loaded };
-            addNews("📂 Progress loaded successfully!", 'positive');
-            updateAll();
-        } catch(err) {
-            alert("Invalid save file.");
-        }
-    };
-    reader.readAsText(file);
-}
-
-// ==================== UI RENDERING ====================
-function switchFinTab(tab) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-
-    document.getElementById('bizTab').style.display = tab === 'businesses' ? 'block' : 'none';
-    document.getElementById('accountsTab').style.display = tab === 'accounts' ? 'block' : 'none';
-    document.getElementById('stocksTab').style.display = tab === 'stocks' ? 'block' : 'none';
-
-    if (tab === 'accounts') renderAccounts();
-    if (tab === 'stocks') renderStocks();
-}
-
-function updateAll() {
-    let bizValue = 0;
-    Object.keys(gameState.businesses).forEach(id => {
-        if (gameState.businesses[id].owned) {
-            const b = businessTypes.find(x => x.id === id);
-            if (b) bizValue += b.cost * 0.8;
-        }
-    });
-
-    let stockValue = 0;
-    Object.entries(gameState.stockPortfolio || {}).forEach(([s, qty]) => stockValue += qty * (stockPrices[s] || 0));
-
-    const netWorth = Math.floor(gameState.cash + gameState.savings + bizValue + stockValue - gameState.debt);
-
-    document.getElementById('netWorth').textContent = '$' + netWorth.toLocaleString();
-    document.getElementById('cash').textContent = '$' + gameState.cash.toLocaleString();
-    document.getElementById('savings').textContent = '$' + gameState.savings.toLocaleString();
-    document.getElementById('day').textContent = gameState.day;
-
-    document.getElementById('debtWarning').classList.toggle('active', gameState.debt > 0);
-    document.getElementById('quitJobBtn').textContent = gameState.hasJob ? "Quit Job" : "No Job";
-    document.getElementById('quitJobBtn').disabled = !gameState.hasJob;
-
-    renderMyBusinesses();
-    renderBuyBusinesses();
-}
-
-function renderMyBusinesses() {
-    const container = document.getElementById('bizList');
-    const owned = Object.keys(gameState.businesses).filter(id => gameState.businesses[id].owned);
-    if (owned.length === 0) {
-        container.innerHTML = `<div style="color:#aaa;padding:25px;text-align:center;">No businesses yet. Buy some in the Financial Hub.</div>`;
-        return;
-    }
-    container.innerHTML = owned.map(id => {
-        const biz = businessTypes.find(b => b.id === id);
-        const profit = biz.income - biz.expense;
-        return `<div class="biz-item"><div><strong>${biz.name}</strong><br><small>Net +$${profit}/day</small></div><div style="text-align:right">+$${biz.income}<br>-$${biz.expense}</div></div>`;
-    }).join('');
-}
-
-function renderBuyBusinesses() {
-    const container = document.getElementById('buyBizList');
-    container.innerHTML = businessTypes.map(biz => {
-        const owned = !!gameState.businesses[biz.id]?.owned;
-        const canBuy = gameState.cash >= biz.cost;
-        return `
-            <div class="biz-item">
-                <div><strong>${biz.name}</strong><br>Cost: $${biz.cost}<br>Net: <span style="color:#4CAF50">+$${biz.income-biz.expense}/day</span></div>
-                <button class="btn small" onclick="buyBusiness('${biz.id}')" ${owned || !canBuy ? 'disabled' : ''}>${owned ? 'Owned' : 'Buy'}</button>
-            </div>`;
-    }).join('');
-}
-
-function renderAccounts() {
-    const container = document.getElementById('accountsList');
-    const dailyInterest = Math.floor(gameState.savings * SAVINGS_DAILY_RATE);
-    let html = `
-        <div class="biz-item"><div>Cash</div><div>$${gameState.cash.toLocaleString()}</div></div>
-        <div class="biz-item"><div>Savings<br><small>Daily interest ≈$${dailyInterest}</small></div><div>$${gameState.savings.toLocaleString()}</div></div>
-        <div class="biz-item"><div>Debt (10% daily)</div><div style="color:#ff6666">-$${gameState.debt.toLocaleString()}</div></div>
-    `;
-    if (gameState.debt > 0) html += `<button class="btn small" onclick="payLoan()" style="width:100%;margin-top:8px;">Pay Loan</button>`;
-    container.innerHTML = html;
-}
-
-function renderStocks() {
-    const container = document.getElementById('stocksList');
-    container.innerHTML = Object.keys(stockPrices).map(sym => {
-        const owned = gameState.stockPortfolio[sym] || 0;
-        return `
-            <div class="biz-item">
-                <div>${sym} @ $${stockPrices[sym]}<br>${owned} shares</div>
-                <div>
-                    <button class="btn small" onclick="buyStock('${sym}')">Buy</button>
-                    <button class="btn small" onclick="sellStock('${sym}')" ${owned===0?'disabled':''}>Sell</button>
+    <div class="container">
+        <!-- LEFT: ACTIVE INCOME + MY ASSETS -->
+        <div class="card">
+            <h2>💼 Active Income &amp; My Empire</h2>
+            <div style="background:rgba(15,22,41,0.5);border-radius:12px;padding:16px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>Job: <strong id="jobStatus">$50/day</strong></div>
+                    <button class="btn small" id="quitJobBtn" onclick="quitJob()">Quit Job</button>
                 </div>
-            </div>`;
-    }).join('');
-}
+                <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <button class="btn" onclick="doSideHustle()" style="background:#22d3ee;color:#0f1629;width:100%;">🚀 Side Hustle (−$25)</button>
+                    <button class="btn" onclick="dayTrade()" style="background:#c026d3;color:#fff;width:100%;">📈 Day Trade (±$150)</button>
+                </div>
+            </div>
 
-function addNews(text, type = 'neutral') {
-    const ticker = document.getElementById('newsTicker');
-    const div = document.createElement('div');
-    div.className = `news-item news-${type}`;
-    div.innerHTML = `<strong>Day ${gameState.day}:</strong> ${text}`;
-    ticker.prepend(div);
-    if (ticker.children.length > 14) ticker.removeChild(ticker.lastChild);
-}
+            <h2 style="margin-top:10px;">🏪 My Businesses</h2>
+            <div class="biz-grid" id="myBizList"></div>
 
-function nextDay() { gameState.day++; processDay(); }
+            <h2 style="margin-top:24px;">🏡 My Properties</h2>
+            <div class="biz-grid" id="myPropList"></div>
+        </div>
 
-function resetGame() {
-    if (confirm("Reset the entire game? All progress will be lost.")) {
-        location.reload();
-    }
-}
+        <!-- CENTER: FINANCIAL HUB -->
+        <div class="card">
+            <h2>💰 Financial Hub • Buy &amp; Grow</h2>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(0)">Businesses</button>
+                <button class="tab" onclick="switchTab(1)">Properties</button>
+                <button class="tab" onclick="switchTab(2)">Accounts &amp; Loans</button>
+                <button class="tab" onclick="switchTab(3)">Stocks</button>
+            </div>
 
-// ==================== INIT ====================
-updateAll(); // initial render
+            <!-- Businesses Tab -->
+            <div id="tab-0">
+                <div class="biz-grid" id="buyBizList"></div>
+            </div>
 
-// Show welcome news after start
-setTimeout(() => {
-    if (document.getElementById('startScreen').style.display === 'none') {
-        addNews("Tip: Build savings and businesses to survive disasters!", 'positive');
-    }
-}, 2000);
-</script>
+            <!-- Properties Tab -->
+            <div id="tab-1" style="display:none;">
+                <div class="biz-grid" id="buyPropList"></div>
+            </div>
+
+            <!-- Accounts Tab -->
+            <div id="tab-2" style="display:none;">
+                <div id="accountsList" class="biz-grid"></div>
+                <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn" onclick="transferToSavings()">Deposit to HYSA</button>
+                    <button class="btn" onclick="withdrawFromSavings()">Withdraw from HYSA</button>
+                    <button class="btn" onclick="takeLoan()" style="background:#f59e0b;">💳 Take $1,000 Loan (10% daily)</button>
+                    <button class="btn" onclick="payLoan()" style="background:#4ade80;">Pay Down Debt</button>
+                </div>
+                <div style="margin-top:12px;font-size:0.85rem;color:#64748b;">
+                    High-Yield Savings = <strong>4.8% APY</strong> — compounds daily
+                </div>
+            </div>
+
+            <!-- Stocks Tab -->
+            <div id="tab-3" style="display:none;">
+                <div id="stocksList" class="biz-grid"></div>
+                <p style="font-size:0.8rem;color:#64748b;margin-top:12px;">Stock prices update every ~25 seconds • Real market volatility</p>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="card" style="grid-row:span 2;">
+            <h2>📰 Daily Event Tracker</h2>
+            <div class="news-ticker" id="newsTicker"></div>
+
+            <div class="save-bar">
+                <button class="btn save" onclick="saveGameFile()">💾 Save Empire</button>
+                <button class="btn" onclick="loadGameFile()" style="background:#22d3ee;color:#0f1629;">📂 Load Empire</button>
+                <input type="file" id="loadFile" accept=".json" style="display:none;" onchange="handleFileLoad(event)">
+            </div>
+
+            <h2 style="margin-top:20px;">⚙️ Game Controls</h2>
+            <button onclick="nextDay()" class="btn" style="background:#22d3ee;color:#0f1629;width:100%;margin-bottom:12px;font-size:1.1rem;padding:16px;">⏩ ADVANCE 1 DAY</button>
+            <button onclick="resetGame()" class="btn danger" style="width:100%;">Reset Game</button>
+
+            <div style="margin-top:28px;background:rgba(255,215,0,0.1);padding:16px;border-radius:12px;font-size:0.9rem;">
+                <strong>💡 Finance Lesson of the Day</strong><br>
+                <span id="dailyTip"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== GAME STATE ====================
+        let gameState = {
+            playerName: '',
+            cash: 850,
+            savings: 450,
+            debt: 0,
+            day: 1,
+            hasJob: true,
+            businesses: {},          // id → count (you can buy 1 at a time)
+            properties: {},          // id → count
+            businessLevels: {},      // id → upgrade level (1 = base)
+            propertyLevels: {},      // id → upgrade level
+            stockPortfolio: {},
+            lastDisasterDay: 0,
+            achievements: []
+        };
+
+        const SAVINGS_DAILY_RATE = 0.000129; // 4.8% APY realistic
+
+        // 15 Businesses
+        const businessTypes = [
+            { id: 'lemonade', name: '🍋 Lemonade Stand', cost: 180, income: 55, expense: 18, desc: 'Classic first business.' },
+            { id: 'hotdog', name: '🌭 Hot Dog Cart', cost: 850, income: 165, expense: 55, desc: 'Street food with high margins.' },
+            { id: 'foodtruck', name: '🍔 Food Truck', cost: 4200, income: 480, expense: 165, desc: 'Mobile empire starter.' },
+            { id: 'carwash', name: '🧼 Car Wash', cost: 9800, income: 720, expense: 240, desc: 'Recession-resistant service.' },
+            { id: 'laundromat', name: '🧺 Laundromat', cost: 24500, income: 1350, expense: 410, desc: '24/7 passive cash machine.' },
+            { id: 'coffeeshop', name: '☕ Coffee Shop', cost: 48000, income: 2450, expense: 920, desc: 'Community hub.' },
+            { id: 'pizza', name: '🍕 Pizza Franchise', cost: 95000, income: 4600, expense: 1650, desc: 'Scalable food brand.' },
+            { id: 'convenience', name: '🏪 Convenience Store', cost: 165000, income: 7800, expense: 3100, desc: 'Neighborhood staple.' },
+            { id: 'gym', name: '🏋️ Gym Chain', cost: 320000, income: 12500, expense: 4800, desc: 'Health & wellness trend.' },
+            { id: 'bookstore', name: '📚 Indie Bookstore', cost: 135000, income: 6200, expense: 2100, desc: 'Culture + community profit.' },
+            { id: 'autorepair', name: '🔧 Auto Repair Shop', cost: 420000, income: 16800, expense: 6800, desc: 'Essential local service.' },
+            { id: 'boutiquehotel', name: '🏨 Boutique Hotel', cost: 1250000, income: 48000, expense: 18500, desc: 'Luxury travel experience.' },
+            { id: 'supermarket', name: '🛒 Regional Supermarket', cost: 2850000, income: 92000, expense: 41000, desc: 'Daily essentials empire.' },
+            { id: 'fastfoodchain', name: '🍟 National Fast-Food Chain', cost: 8200000, income: 245000, expense: 112000, desc: 'Global brand scale.' },
+            { id: 'megacorp', name: '🏢 Global Megacorp', cost: 35000000, income: 980000, expense: 410000, desc: 'Billionaire territory.' }
+        ];
+
+        // 15 Properties
+        const propertyTypes = [
+            { id: 'tinyhome', name: '🏠 Tiny Home', cost: 42000, income: 245, expense: 65, desc: 'Affordable entry rental.' },
+            { id: 'studio', name: '🏢 Studio Apartment', cost: 95000, income: 520, expense: 110, desc: 'Urban rental goldmine.' },
+            { id: 'singlefamily', name: '🏡 Single-Family Home', cost: 225000, income: 1180, expense: 280, desc: 'Classic American rental.' },
+            { id: 'duplex', name: '🏘️ Duplex', cost: 380000, income: 1980, expense: 420, desc: 'Double the rent.' },
+            { id: 'triplex', name: '🏘️ Triplex', cost: 620000, income: 3150, expense: 680, desc: '3 units = serious cash flow.' },
+            { id: 'townhouse', name: '🏠 Townhouse Block', cost: 520000, income: 2650, expense: 590, desc: 'Suburban rental cluster.' },
+            { id: 'smallapts', name: '🏢 6-Unit Apartment', cost: 950000, income: 4850, expense: 1150, desc: 'Multi-family powerhouse.' },
+            { id: 'commercial', name: '🛍️ Small Retail Strip', cost: 1350000, income: 7200, expense: 1850, desc: 'Commercial real estate.' },
+            { id: 'office', name: '🏢 Office Building', cost: 2450000, income: 13200, expense: 3400, desc: 'Businesses pay you.' },
+            { id: 'warehouse', name: '📦 Warehouse', cost: 3800000, income: 17800, expense: 4800, desc: 'Logistics play.' },
+            { id: 'luxurycondo', name: '🏙️ Luxury Condo Tower', cost: 7200000, income: 38500, expense: 9800, desc: 'High-end urban rentals.' },
+            { id: 'shoppingplaza', name: '🛒 Shopping Plaza', cost: 14500000, income: 78000, expense: 24500, desc: 'Retail destination.' },
+            { id: 'midrise', name: '🏬 Mid-Rise Apartments', cost: 28500000, income: 148000, expense: 42000, desc: 'Hundreds of tenants.' },
+            { id: 'hotelcomplex', name: '🏨 Full Hotel Complex', cost: 52000000, income: 265000, expense: 95000, desc: 'Hospitality empire.' },
+            { id: 'skyscraper', name: '🌆 Downtown Skyscraper', cost: 145000000, income: 720000, expense: 245000, desc: 'Iconic landmark asset.' }
+        ];
+
+        const stockPrices = { 'AAPL': 238, 'TSLA': 312, 'NVDA': 148, 'AMZN': 205, 'GOOGL': 168 };
+        let autoDayInterval = null;
+
+        // ==================== CORE ENGINE ====================
+        function startGame() {
+            const name = document.getElementById('playerNameInput').value.trim() || 'Tycoon';
+            gameState.playerName = name;
+            document.getElementById('startScreen').style.display = 'none';
+
+            updateAll();
+            addNews(`👋 Welcome, ${name}! Your empire starts today.`, 'positive');
+            addNews('💡 Tip: Buy ONE at a time • Upgrade for massive profit boosts • Watch the Daily Tracker!', 'positive');
+
+            autoDayInterval = setInterval(() => { gameState.day++; processDay(); }, 14000);
+        }
+
+        function processDay() {
+            let totalPassive = 0;
+            let dailySummary = `<div class="news-daily"><strong>📅 DAY ${gameState.day} SUMMARY</strong><br>`;
+
+            // Job
+            if (gameState.hasJob) {
+                gameState.cash += 50;
+                dailySummary += `💼 Job pay: <span style="color:#4ade80">+$50</span><br>`;
+            }
+
+            // Businesses
+            let bizTotal = 0;
+            Object.keys(gameState.businesses).forEach(id => {
+                const biz = businessTypes.find(b => b.id === id);
+                if (!biz) return;
+                const count = gameState.businesses[id];
+                const level = gameState.businessLevels[id] || 1;
+                const netMultiplier = Math.pow(1.4, level - 1);
+                const expenseMultiplier = Math.pow(1.22, level - 1);
+                const dailyNet = Math.floor((biz.income * netMultiplier - biz.expense * expenseMultiplier) * count);
+                gameState.cash += dailyNet;
+                bizTotal += dailyNet;
+                dailySummary += `🏪 ${biz.name} ×${count} (Lvl ${level}): <span style="color:#4ade80">+$${dailyNet}</span><br>`;
+            });
+
+            // Properties
+            let propTotal = 0;
+            Object.keys(gameState.properties).forEach(id => {
+                const prop = propertyTypes.find(p => p.id === id);
+                if (!prop) return;
+                const count = gameState.properties[id];
+                const level = gameState.propertyLevels[id] || 1;
+                const netMultiplier = Math.pow(1.4, level - 1);
+                const expenseMultiplier = Math.pow(1.22, level - 1);
+                const dailyNet = Math.floor((prop.income * netMultiplier - prop.expense * expenseMultiplier) * count);
+                gameState.cash += dailyNet;
+                propTotal += dailyNet;
+                dailySummary += `🏡 ${prop.name} ×${count} (Lvl ${level}): <span style="color:#4ade80">+$${dailyNet}</span><br>`;
+            });
+
+            // Savings
+            let interest = 0;
+            if (gameState.savings > 0) {
+                interest = Math.floor(gameState.savings * SAVINGS_DAILY_RATE);
+                gameState.savings += interest;
+                dailySummary += `🏦 HYSA interest: <span style="color:#4ade80">+$${interest}</span><br>`;
+            }
+
+            // Debt
+            let debtCost = 0;
+            if (gameState.debt > 0) {
+                debtCost = Math.floor(gameState.debt * 0.10);
+                gameState.debt += debtCost;
+                dailySummary += `💳 Debt interest: <span style="color:#ff6b6b">-$${debtCost}</span><br>`;
+            }
+
+            dailySummary += `────────────────────────────────<br>`;
+            dailySummary += `💰 NET TODAY: <strong>+$${(bizTotal + propTotal + (gameState.hasJob?50:0) + interest - debtCost).toLocaleString()}</strong></div>`;
+
+            addNews(dailySummary, 'neutral');
+
+            // Random events & disasters
+            if (Math.random() < 0.18) triggerRandomEvent();
+            if (gameState.day - gameState.lastDisasterDay > 28 && Math.random() < 0.025) {
+                triggerDisaster();
+                gameState.lastDisasterDay = gameState.day;
+            }
+
+            if (gameState.cash < -300) {
+                gameState.debt += Math.abs(gameState.cash) + 250;
+                gameState.cash = 50;
+            }
+
+            checkAchievements();
+            updateAll();
+        }
+
+        function triggerRandomEvent() {
+            const events = [
+                { text: '📈 Tech boom! NVDA +22%', type: 'positive', effect: () => { stockPrices.NVDA = Math.round(stockPrices.NVDA * 1.22); } },
+                { text: '📉 Recession scare — fast food sales dip 15%', type: 'negative', effect: () => { if (gameState.businesses['fastfoodchain']) gameState.cash -= 12000; } },
+                { text: '🏡 Housing market surge — all properties worth 8% more!', type: 'positive', effect: () => {} },
+                { text: '🌍 Supply chain issue — businesses pay +$800 extra today', type: 'negative', effect: () => { gameState.cash -= 800; } }
+            ];
+            const ev = events[Math.floor(Math.random() * events.length)];
+            ev.effect();
+            addNews(ev.text, ev.type);
+        }
+
+        function triggerDisaster() {
+            const cost = [600, 1400, 2800, 5200][Math.floor(Math.random()*4)];
+            if (gameState.savings >= cost) {
+                gameState.savings -= cost;
+                addNews(`🏚️ Disaster covered by savings (−$${cost})`, 'negative');
+            } else if (gameState.cash >= cost) {
+                gameState.cash -= cost;
+                addNews(`🏚️ Disaster paid from cash (−$${cost})`, 'negative');
+            } else {
+                const shortfall = cost - Math.max(gameState.cash, 0);
+                gameState.cash = 0;
+                gameState.debt += shortfall + 300;
+                addNews(`🏚️ Major disaster! Took $${shortfall} new debt`, 'negative');
+            }
+        }
+
+        function checkAchievements() {
+            const passive = getTotalPassive();
+            if (passive >= 1000 && !gameState.achievements.includes('firstk')) {
+                gameState.achievements.push('firstk');
+                addNews('🏆 ACHIEVEMENT: $1,000/day passive income unlocked!', 'positive');
+            }
+            if (gameState.netWorth && gameState.netWorth >= 1000000 && !gameState.achievements.includes('millionaire')) {
+                gameState.achievements.push('millionaire');
+                addNews('🏆 ACHIEVEMENT: You are officially a millionaire!', 'positive');
+            }
+        }
+
+        function getTotalPassive() {
+            let total = gameState.hasJob ? 50 : 0;
+            Object.keys(gameState.businesses).forEach(id => {
+                const biz = businessTypes.find(b => b.id === id);
+                if (biz) {
+                    const level = gameState.businessLevels[id] || 1;
+                    const netMult = Math.pow(1.4, level - 1);
+                    const expMult = Math.pow(1.22, level - 1);
+                    total += (biz.income * netMult - biz.expense * expMult) * (gameState.businesses[id] || 0);
+                }
+            });
+            Object.keys(gameState.properties).forEach(id => {
+                const prop = propertyTypes.find(p => p.id === id);
+                if (prop) {
+                    const level = gameState.propertyLevels[id] || 1;
+                    const netMult = Math.pow(1.4, level - 1);
+                    const expMult = Math.pow(1.22, level - 1);
+                    total += (prop.income * netMult - prop.expense * expMult) * (gameState.properties[id] || 0);
+                }
+            });
+            return Math.floor(total);
+        }
+
+        // ==================== ACTIONS ====================
+        function quitJob() {
+            if (!gameState.hasJob || !confirm("Quit your job?")) return;
+            gameState.hasJob = false;
+            addNews("💼 You quit your job — full focus on passive income now!", 'neutral');
+            updateAll();
+        }
+
+        function doSideHustle() {
+            if (gameState.cash < 25) return alert("Need $25!");
+            gameState.cash -= 25;
+            const earnings = Math.floor(Math.random() * 320) - 80;
+            gameState.cash += earnings;
+            addNews(`🚀 Side hustle: ${earnings >= 0 ? '+' : ''}$${earnings}`, earnings >= 0 ? 'positive' : 'negative');
+            updateAll();
+        }
+
+        function dayTrade() {
+            const result = Math.floor(Math.random() * 301) - 150;
+            gameState.cash += result;
+            addNews(`📈 Day trade: ${result >= 0 ? '+' : ''}$${result}`, result >= 0 ? 'positive' : 'negative');
+            updateAll();
+        }
+
+        // BUY ONLY 1 AT A TIME
+        function buyAsset(type, id) {
+            const list = type === 'biz' ? businessTypes : propertyTypes;
+            const asset = list.find(a => a.id === id);
+            if (!asset) return;
+            if (gameState.cash < asset.cost) return alert(`You need $${asset.cost.toLocaleString()} to buy 1 × ${asset.name}`);
+
+            gameState.cash -= asset.cost;
+            const target = type === 'biz' ? gameState.businesses : gameState.properties;
+            target[id] = (target[id] || 0) + 1;
+
+            const emoji = type === 'biz' ? '🏪' : '🏡';
+            addNews(`${emoji} Bought 1 × ${asset.name} for $${asset.cost.toLocaleString()}`, 'positive');
+            updateAll();
+        }
+
+        function upgradeAsset(type, id) {
+            const list = type === 'biz' ? businessTypes : propertyTypes;
+            const asset = list.find(a => a.id === id);
+            const targetLevels = type === 'biz' ? gameState.businessLevels : gameState.propertyLevels;
+            const count = type === 'biz' ? (gameState.businesses[id] || 0) : (gameState.properties[id] || 0);
+            if (!asset || count === 0) return;
+
+            const currentLevel = targetLevels[id] || 1;
+            if (currentLevel >= 5) return alert("Maximum upgrade level reached!");
+
+            const upgradeCost = Math.floor(asset.cost * Math.pow(2.8, currentLevel));
+            if (gameState.cash < upgradeCost) return alert(`Need $${upgradeCost.toLocaleString()} to upgrade to Level ${currentLevel + 1}`);
+
+            gameState.cash -= upgradeCost;
+            targetLevels[id] = currentLevel + 1;
+
+            addNews(`⬆️ Upgraded ${asset.name} to Level ${currentLevel + 1} (all ${count} units boosted!)`, 'positive');
+            updateAll();
+        }
+
+        function takeLoan() {
+            gameState.cash += 1000;
+            gameState.debt += 1000;
+            addNews('💳 Took $1,000 loan at 10% daily interest', 'negative');
+            updateAll();
+        }
+
+        function payLoan() {
+            if (gameState.debt <= 0) return alert("No debt!");
+            const amt = parseInt(prompt(`Current debt: $${gameState.debt.toLocaleString()}\nHow much to pay?`, Math.min(2000, gameState.debt).toString()));
+            if (amt > 0 && amt <= gameState.cash && amt <= gameState.debt) {
+                gameState.cash -= amt;
+                gameState.debt -= amt;
+                addNews(`💰 Paid $${amt.toLocaleString()} of debt`, 'positive');
+                updateAll();
+            }
+        }
+
+        function transferToSavings() {
+            const amt = parseInt(prompt(`Cash: $${gameState.cash.toLocaleString()}\nDeposit how much?`, "500"));
+            if (amt > 0 && amt <= gameState.cash) {
+                gameState.cash -= amt;
+                gameState.savings += amt;
+                addNews(`💰 Deposited $${amt.toLocaleString()} into 4.8% HYSA`, 'positive');
+                updateAll();
+            }
+        }
+
+        function withdrawFromSavings() {
+            const amt = parseInt(prompt(`Savings: $${gameState.savings.toLocaleString()}\nWithdraw how much?`, "300"));
+            if (amt > 0 && amt <= gameState.savings) {
+                gameState.savings -= amt;
+                gameState.cash += amt;
+                addNews(`🏦 Withdrew $${amt.toLocaleString()} from HYSA`, 'neutral');
+                updateAll();
+            }
+        }
+
+        function updateStockPrices() {
+            Object.keys(stockPrices).forEach(k => {
+                stockPrices[k] = Math.max(60, Math.round(stockPrices[k] * (0.93 + Math.random() * 0.15)));
+            });
+            if (document.getElementById('tab-3').style.display !== 'none') renderStocks();
+        }
+
+        function buyStock(sym) {
+            const price = stockPrices[sym];
+            const shares = parseInt(prompt(`Buying ${sym} @ $${price}\nHow many shares?`, "5"));
+            if (shares > 0 && shares * price <= gameState.cash) {
+                gameState.cash -= shares * price;
+                gameState.stockPortfolio[sym] = (gameState.stockPortfolio[sym] || 0) + shares;
+                addNews(`📈 Bought ${shares} shares of ${sym}`, 'positive');
+                updateAll();
+            }
+        }
+
+        function sellStock(sym) {
+            const owned = gameState.stockPortfolio[sym] || 0;
+            if (owned === 0) return;
+            const price = stockPrices[sym];
+            const shares = parseInt(prompt(`Sell how many ${sym} @ $${price}?`, "3"));
+            if (shares > 0 && shares <= owned) {
+                gameState.cash += shares * price;
+                gameState.stockPortfolio[sym] -= shares;
+                if (gameState.stockPortfolio[sym] <= 0) delete gameState.stockPortfolio[sym];
+                addNews(`📉 Sold ${shares} shares of ${sym}`, 'positive');
+                updateAll();
+            }
+        }
+
+        // ==================== RENDERING ====================
+        function switchTab(n) {
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+            for (let i = 0; i < 4; i++) {
+                const el = document.getElementById('tab-' + i);
+                if (el) el.style.display = i === n ? 'block' : 'none';
+            }
+            if (n === 2) renderAccounts();
+            if (n === 3) renderStocks();
+        }
+
+        function updateAll() {
+            let bizValue = 0, propValue = 0;
+            Object.keys(gameState.businesses).forEach(id => {
+                const b = businessTypes.find(x => x.id === id);
+                if (b) bizValue += b.cost * 0.85 * (gameState.businesses[id] || 0);
+            });
+            Object.keys(gameState.properties).forEach(id => {
+                const p = propertyTypes.find(x => x.id === id);
+                if (p) propValue += p.cost * 0.9 * (gameState.properties[id] || 0);
+            });
+            let stockValue = 0;
+            Object.entries(gameState.stockPortfolio || {}).forEach(([s, qty]) => stockValue += qty * (stockPrices[s] || 0));
+
+            const netWorth = Math.floor(gameState.cash + gameState.savings + bizValue + propValue + stockValue - gameState.debt);
+            gameState.netWorth = netWorth;
+
+            document.getElementById('netWorth').textContent = '$' + netWorth.toLocaleString();
+            document.getElementById('cash').textContent = '$' + gameState.cash.toLocaleString();
+            document.getElementById('savings').textContent = '$' + gameState.savings.toLocaleString();
+            document.getElementById('day').textContent = gameState.day;
+            document.getElementById('passiveIncome').textContent = '$' + getTotalPassive().toLocaleString() + '/day';
+
+            document.getElementById('debtWarning').classList.toggle('active', gameState.debt > 0);
+            document.getElementById('quitJobBtn').textContent = gameState.hasJob ? "Quit Job" : "No Job";
+            document.getElementById('quitJobBtn').disabled = !gameState.hasJob;
+
+            renderMyAssets();
+            renderBuyBusinesses();
+            renderBuyProperties();
+        }
+
+        function renderMyAssets() {
+            // Businesses
+            const bizContainer = document.getElementById('myBizList');
+            const bizKeys = Object.keys(gameState.businesses);
+            if (bizKeys.length === 0) {
+                bizContainer.innerHTML = `<div style="padding:30px;text-align:center;color:#64748b;">No businesses yet.<br>Buy 1 at a time in the Financial Hub.</div>`;
+            } else {
+                bizContainer.innerHTML = bizKeys.map(id => {
+                    const biz = businessTypes.find(b => b.id === id);
+                    const count = gameState.businesses[id];
+                    const level = gameState.businessLevels[id] || 1;
+                    const netMult = Math.pow(1.4, level - 1);
+                    const expMult = Math.pow(1.22, level - 1);
+                    const net = Math.floor((biz.income * netMult - biz.expense * expMult) * count);
+                    const upgradeCost = Math.floor(biz.cost * Math.pow(2.8, level));
+                    return `
+                    <div class="biz-item">
+                        <div>
+                            <strong>${biz.name}</strong> ×${count} <span style="background:#22d3ee;color:#0f1629;padding:2px 8px;border-radius:9999px;font-size:0.8rem;">Lvl ${level}</span><br>
+                            <small>Net daily: +$${net}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <button onclick="upgradeAsset('biz','${id}')" class="btn small" style="background:#ffd700;margin-bottom:4px;">Upgrade ($${upgradeCost.toLocaleString()})</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // Properties
+            const propContainer = document.getElementById('myPropList');
+            const propKeys = Object.keys(gameState.properties);
+            if (propKeys.length === 0) {
+                propContainer.innerHTML = `<div style="padding:30px;text-align:center;color:#64748b;">No properties yet.<br>Buy 1 at a time in the Financial Hub.</div>`;
+            } else {
+                propContainer.innerHTML = propKeys.map(id => {
+                    const prop = propertyTypes.find(p => p.id === id);
+                    const count = gameState.properties[id];
+                    const level = gameState.propertyLevels[id] || 1;
+                    const netMult = Math.pow(1.4, level - 1);
+                    const expMult = Math.pow(1.22, level - 1);
+                    const net = Math.floor((prop.income * netMult - prop.expense * expMult) * count);
+                    const upgradeCost = Math.floor(prop.cost * Math.pow(2.8, level));
+                    return `
+                    <div class="biz-item">
+                        <div>
+                            <strong>${prop.name}</strong> ×${count} <span style="background:#22d3ee;color:#0f1629;padding:2px 8px;border-radius:9999px;font-size:0.8rem;">Lvl ${level}</span><br>
+                            <small>Rent daily: +$${net}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <button onclick="upgradeAsset('prop','${id}')" class="btn small" style="background:#ffd700;margin-bottom:4px;">Upgrade ($${upgradeCost.toLocaleString()})</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        function renderBuyBusinesses() {
+            const container = document.getElementById('buyBizList');
+            container.innerHTML = businessTypes.map(biz => {
+                const owned = gameState.businesses[biz.id] || 0;
+                const canAfford = gameState.cash >= biz.cost;
+                return `
+                <div class="biz-item">
+                    <div>
+                        <strong>${biz.name}</strong><br>
+                        Cost: <strong>$${biz.cost.toLocaleString()}</strong><br>
+                        <span style="color:#4ade80">Net +$${(biz.income - biz.expense)}/day</span>
+                        <div style="font-size:0.8rem;color:#b8c5ff;margin-top:4px;">${biz.desc}</div>
+                    </div>
+                    <div style="text-align:right">
+                        ${owned > 0 ? `<span style="background:#4ade80;color:#0f1629;padding:2px 8px;border-radius:9999px;font-size:0.85rem;">Owned ×${owned}</span><br>` : ''}
+                        <button onclick="buyAsset('biz','${biz.id}')" class="btn small" ${!canAfford ? 'disabled' : ''}>Buy 1</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderBuyProperties() {
+            const container = document.getElementById('buyPropList');
+            container.innerHTML = propertyTypes.map(prop => {
+                const owned = gameState.properties[prop.id] || 0;
+                const canAfford = gameState.cash >= prop.cost;
+                return `
+                <div class="biz-item">
+                    <div>
+                        <strong>${prop.name}</strong><br>
+                        Cost: <strong>$${prop.cost.toLocaleString()}</strong><br>
+                        <span style="color:#4ade80">Net rent +$${(prop.income - prop.expense)}/day</span>
+                        <div style="font-size:0.8rem;color:#b8c5ff;margin-top:4px;">${prop.desc}</div>
+                    </div>
+                    <div style="text-align:right">
+                        ${owned > 0 ? `<span style="background:#4ade80;color:#0f1629;padding:2px 8px;border-radius:9999px;font-size:0.85rem;">Owned ×${owned}</span><br>` : ''}
+                        <button onclick="buyAsset('prop','${prop.id}')" class="btn small" ${!canAfford ? 'disabled' : ''}>Buy 1</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderAccounts() {
+            const container = document.getElementById('accountsList');
+            const dailyInterest = Math.floor(gameState.savings * SAVINGS_DAILY_RATE);
+            container.innerHTML = `
+                <div class="biz-item"><div>Cash Balance</div><div>$${gameState.cash.toLocaleString()}</div></div>
+                <div class="biz-item"><div>High-Yield Savings<br><small>~$${dailyInterest} today • 4.8% APY</small></div><div>$${gameState.savings.toLocaleString()}</div></div>
+                <div class="biz-item"><div>Debt (10% daily interest)</div><div style="color:#ff6b6b">-$${gameState.debt.toLocaleString()}</div></div>
+            `;
+        }
+
+        function renderStocks() {
+            const container = document.getElementById('stocksList');
+            container.innerHTML = Object.keys(stockPrices).map(sym => {
+                const owned = gameState.stockPortfolio[sym] || 0;
+                return `
+                <div class="biz-item">
+                    <div>${sym} @ <strong>$${stockPrices[sym]}</strong><br>${owned} shares</div>
+                    <div>
+                        <button class="btn small" onclick="buyStock('${sym}')">Buy</button>
+                        <button class="btn small" onclick="sellStock('${sym}')" ${owned===0?'disabled':''}>Sell</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function addNews(text, type = 'neutral') {
+            const ticker = document.getElementById('newsTicker');
+            const div = document.createElement('div');
+            div.className = `news-item news-${type}`;
+            div.innerHTML = text;
+            ticker.prepend(div);
+            if (ticker.children.length > 22) ticker.removeChild(ticker.lastChild);
+        }
+
+        function nextDay() {
+            gameState.day++;
+            processDay();
+        }
+
+        function saveGameFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `financier-tycoon-day${gameState.day}.json`;
+            a.click();
+            addNews('💾 Empire saved!', 'positive');
+        }
+
+        function loadGameFile() {
+            document.getElementById('loadFile').click();
+        }
+
+        function handleFileLoad(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const loaded = JSON.parse(ev.target.result);
+                    gameState = Object.assign(gameState, loaded);
+                    addNews('📂 Empire loaded!', 'positive');
+                    updateAll();
+                } catch(err) { alert("Invalid save file."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetGame() {
+            if (confirm("Erase everything and start over?")) location.reload();
+        }
+
+        const tips = [
+            "Buy 1 at a time and upgrade — that’s how real tycoons scale.",
+            "Upgrading assets gives exponential returns.",
+            "High-yield savings + debt management = survival in tough times.",
+            "Track every dollar in the Daily Event Tracker — this is real financial literacy."
+        ];
+
+        function rotateTip() {
+            document.getElementById('dailyTip').textContent = tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // ==================== INIT ====================
+        setInterval(updateStockPrices, 25000);
+        setInterval(rotateTip, 17000);
+        updateAll();
+        rotateTip();
+    </script>
 </body>
 </html>
