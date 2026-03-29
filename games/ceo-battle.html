@@ -663,7 +663,7 @@
  // ==================== MOVEMENT & TURN LOGIC ====================
  async function moveToken(steps, player) {
  isMoving = true;
- const oldPosition = player.position;
+ let oldPosition = player.position;
  
  for (let i = 0; i < steps; i++) {
  player.position = (player.position + 1) % 24;
