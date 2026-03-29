@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>🎮 CEO Battle: Last Stand • SamOwl Games</title>
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+ :root {
+ --gold: #ffd700;
+ --accent: #00ff9d;
+ --danger: #ef4444;
+ --samowl-purple: #8b5cf6;
+ }
+
+ * { margin:0; padding:0; box-sizing:border-box; }
+ 
+ body {
+ background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+ color: white;
+ font-family: 'Inter', sans-serif;
+ overflow: hidden;
+ height: 100vh;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ }
+
+ .game-container {
+ display: flex;
+ gap: 20px;
+ max-width: 1400px;
+ width: 100%;
+ padding: 12px;
+ }
+
+ /* BOARD */
+ .board-wrapper {
+ position: relative;
+ width: 580px;
+ height: 580px;
+ flex-shrink: 0;
+ }
+
+ #board {
+ position: relative;
+ width: 580px;
+ height: 580px;
+ background: radial-gradient(circle at center, #1f1f1f 0%, #0a0a0a 70%);
+ border: 28px solid #222;
+ border-radius: 50%;
+ box-shadow: 0 0 60px -10px var(--gold), inset 0 0 80px rgba(255,215,0,0.2);
+ }
+
+ .center-circle {
+ position: absolute;
+ top: 50%; left: 50%;
+ transform: translate(-50%, -50%);
+ width: 200px; height: 200px;
+ background: #111;
+ border: 16px solid var(--gold);
+ border-radius: 50%;
+ display: flex; flex-direction: column; align-items: center; justify-content: center;
+ z-index: 10;
+ }
+
+ .center-circle .logo {
+ font-size: 42px;
+ margin-bottom: 4px;
+ }
+ 
+ .center-circle h1 { 
+ font-family: 'Space Grotesk', sans-serif; 
+ font-size: 20px; 
+ color: var(--gold); 
+ text-align: center;
+ line-height: 1.2;
+ }
+ 
+ .center-circle .tagline {
+ font-size: 11px;
+ color: #888;
+ margin-top: 4px;
+ }
+
+ .space {
+ position: absolute;
+ width: 54px; height: 76px;
+ background: #222; border: 2px solid #444;
+ border-radius: 8px;
+ display: flex; flex-direction: column; align-items: center; justify-content: center;
+ text-align: center; font-size: 9px; font-weight: 600;
+ box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+ transition: all 0.2s ease;
+ }
+
+ .space:hover { transform: scale(1.08); z-index: 20; }
+ .space.owned-player { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
+ .space.owned-ai { border-color: #f87171; box-shadow: 0 0 15px #f87171; }
+
+ .space .name {
+ transform: rotate(0deg) !important;
+ padding: 2px;
+ line-height: 1.1;
+ }
+ 
+ .space .price {
+ font-size: 8px;
+ color: #aaa;
+ }
+
+ .token {
+ position: absolute;
+ width: 36px; height: 36px;
+ display: flex; align-items: center; justify-content: center;
+ font-size: 26px; z-index: 40;
+ transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+ filter: drop-shadow(0 0 12px var(--accent));
+ }
+
+ /* SIDE PANEL */
+ .side-panel {
+ width: 440px;
+ display: flex;
+ flex-direction: column;
+ gap: 12px;
+ overflow-y: auto;
+ max-height: 98vh;
+ }
+
+ .panel {
+ background: #1a1a2e;
+ border: 2px solid #333;
+ border-radius: 14px;
+ padding: 14px;
+ }
+
+ .panel h3 {
+ font-size: 14px;
+ color: var(--gold);
+ margin-bottom: 10px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ }
+
+ .mode-select {
+ text-align: center;
+ margin-bottom: 8px;
+ }
+
+ .mode-btn {
+ padding: 8px 14px;
+ margin: 4px;
+ background: #222;
+ border: 2px solid #444;
+ border-radius: 9999px;
+ cursor: pointer;
+ font-weight: 600;
+ font-size: 13px;
+ }
+
+ .mode-btn.active {
+ background: var(--accent);
+ color: #111;
+ border-color: var(--accent);
+ }
+
+ .characters-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+ gap: 8px;
+ }
+
+ .character-card {
+ background: #222;
+ border: 2px solid #444;
+ border-radius: 10px;
+ padding: 10px 6px;
+ text-align: center;
+ cursor: pointer;
+ transition: all 0.25s ease;
+ }
+
+ .character-card:hover {
+ border-color: #666;
+ }
+
+ .character-card.selected {
+ border-color: var(--accent);
+ background: #1f2a1f;
+ }
+
+ .character-card .emoji {
+ font-size: 32px;
+ }
+ 
+ .character-card .name {
+ font-size: 13px;
+ font-weight: 600;
+ margin-top: 4px;
+ }
+ 
+ .character-card .trait {
+ font-size: 10px;
+ color: #888;
+ }
+
+ .player-list {
+ max-height: 140px;
+ overflow-y: auto;
+ }
+
+ .player-item {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ background: #222;
+ padding: 8px;
+ border-radius: 8px;
+ margin-bottom: 6px;
+ font-size: 13px;
+ }
+
+ .stat-row {
+ display: flex;
+ justify-content: space-between;
+ padding: 5px 0;
+ border-bottom: 1px solid #333;
+ font-size: 12px;
+ }
+
+ .dice-container {
+ display: flex; justify-content: center; gap: 20px; margin: 12px 0;
+ }
+
+ .die {
+ width: 52px; height: 52px;
+ background: white; border-radius: 12px;
+ display: flex; align-items: center; justify-content: center;
+ font-size: 32px;
+ box-shadow: 6px 6px 0 #ccc, inset 0 0 15px rgba(0,0,0,0.2);
+ }
+
+ .roll-btn {
+ background: linear-gradient(90deg, #ffd700, #ffed9e);
+ color: #111;
+ font-family: 'Space Grotesk', sans-serif;
+ font-size: 18px;
+ font-weight: 700;
+ padding: 12px;
+ border: none;
+ border-radius: 9999px;
+ cursor: pointer;
+ width: 100%;
+ transition: transform 0.1s;
+ }
+
+ .roll-btn:hover:not(:disabled) {
+ transform: scale(1.02);
+ }
+
+ .roll-btn:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ }
+
+ .action-panel {
+ border-color: var(--gold);
+ min-height: 120px;
+ }
+
+ button.action-btn {
+ width: 100%; padding: 10px; margin: 6px 0;
+ border: none; border-radius: 10px;
+ font-weight: 600; font-size: 14px; cursor: pointer;
+ }
+
+ .buy-btn { background: #22c55e; color: white; }
+ .build-btn { background: #3b82f6; color: white; }
+ .pass-btn { background: #64748b; color: white; }
+
+ .log {
+ background: #0f0f1e;
+ border-radius: 10px;
+ padding: 10px;
+ height: 100px;
+ overflow-y: auto;
+ font-size: 12px;
+ line-height: 1.45;
+ color: #00ff9d;
+ }
+
+ .turn-indicator {
+ text-align: center;
+ font-size: 15px;
+ font-weight: 700;
+ padding: 8px;
+ background: #222;
+ border-radius: 10px;
+ margin-bottom: 10px;
+ }
+
+ .win-screen {
+ position: fixed;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background: rgba(0,0,0,0.95);
+ display: none;
+ align-items: center;
+ justify-content: center;
+ flex-direction: column;
+ z-index: 1000;
+ }
+
+ .win-screen .samowl-logo {
+ font-size: 64px;
+ margin-bottom: 16px;
+ }
+
+ .win-screen h1 { font-size: 48px; color: var(--gold); margin-bottom: 12px; }
+ .win-screen .winner-name { font-size: 32px; color: var(--accent); margin-bottom: 8px; }
+ .win-screen .subtitle { font-size: 18px; color: #888; margin-bottom: 24px; }
+
+ .play-again-btn {
+ background: linear-gradient(90deg, var(--samowl-purple), #a78bfa);
+ color: white;
+ padding: 14px 36px;
+ border: none;
+ border-radius: 9999px;
+ font-size: 18px;
+ font-weight: 700;
+ cursor: pointer;
+ }
+
+ /* SamOwl Footer */
+ .samowl-footer {
+ position: fixed;
+ bottom: 8px;
+ right: 12px;
+ font-size: 12px;
+ color: #555;
+ }
+ 
+ .samowl-footer a {
+ color: var(--samowl-purple);
+ text-decoration: none;
+ }
+ </style>
+</head>
+<body>
+ <div class="game-container">
+ <!-- BOARD -->
+ <div class="board-wrapper">
+ <div id="board"></div>
+ </div>
+
+ <!-- SIDE PANEL -->
+ <div class="side-panel">
+
+ <!-- GAME MODE -->
+ <div class="panel">
+ <div class="mode-select">
+ <h3>GAME MODE</h3>
+ <button class="mode-btn active" data-mode="1">Solo (1+3AI)</button>
+ <button class="mode-btn" data-mode="2">2 Players + 2 AI</button>
+ <button class="mode-btn" data-mode="3">3 Players + 1 AI</button>
+ <button class="mode-btn" data-mode="4">4 Players</button>
+ </div>
+ </div>
+
+ <!-- CHARACTER SELECTION -->
+ <div class="panel">
+ <h3>SELECT YOUR CEO</h3>
+ <div class="characters-grid" id="characters-grid"></div>
+ </div>
+
+ <!-- ACTIVE PLAYERS -->
+ <div class="panel">
+ <h3>ACTIVE PLAYERS</h3>
+ <div class="player-list" id="player-list"></div>
+ </div>
+
+ <!-- TURN INDICATOR -->
+ <div class="turn-indicator" id="turn-indicator">
+ Select characters to begin
+ </div>
+
+ <!-- ACTION PANEL -->
+ <div class="panel action-panel" id="action-panel" style="display:none;">
+ <h3 id="landed-title">LANDED ON...</h3>
+ <div id="action-content"></div>
+ </div>
+
+ <!-- DICE -->
+ <div class="panel">
+ <h3>🎲 ROLL TO MOVE</h3>
+ <div class="dice-container">
+ <div class="die" id="die1">⚅</div>
+ <div class="die" id="die2">⚄</div>
+ </div>
+ <button id="roll-btn" class="roll-btn" disabled>ROLL DICE</button>
+
+ <div id="roll-result" style="text-align:center; margin:10px 0; font-size:20px; font-weight:700;"></div>
+
+ <div class="log" id="log">Welcome to CEO Battle: Last Stand</div>
+ </div>
+ </div>
+ </div>
+
+ <!-- WIN SCREEN -->
+ <div class="win-screen" id="win-screen">
+ <div class="samowl-logo">🦉</div>
+ <h1 id="win-title">VICTORY!</h1>
+ <div class="winner-name" id="win-name"></div>
+ <div class="subtitle" id="win-subtitle">is the last CEO standing!</div>
+ <button class="play-again-btn" onclick="location.reload()">PLAY AGAIN</button>
+ </div>
+
+ <div class="samowl-footer">
+ 🦉 <a href="https://samowl.net/games">SamOwl Games</a>
+ </div>
+
+ <script>
+ // ==================== GAME DATA ====================
+ let spaces = [
+ { id: 0, name: "CEO HQ", type: "go", color: "#22c55e", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 1, name: "Street Café", type: "property", color: "#854d0e", price: 12000, rent: 1400, owner: null, buildings: 0 },
+ { id: 2, name: "Corner Bakery", type: "property", color: "#854d0e", price: 14000, rent: 1600, owner: null, buildings: 0 },
+ { id: 3, name: "CHANCE", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 4, name: "Local Gym", type: "property", color: "#0ea5e9", price: 18000, rent: 2000, owner: null, buildings: 0 },
+ { id: 5, name: "Book Nook", type: "property", color: "#0ea5e9", price: 20000, rent: 2200, owner: null, buildings: 0 },
+ { id: 6, name: "Pet Haven", type: "property", color: "#0ea5e9", price: 22000, rent: 2400, owner: null, buildings: 0 },
+ { id: 7, name: "COMMUNITY", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 8, name: "Fashion Hub", type: "property", color: "#e11d48", price: 26000, rent: 2800, owner: null, buildings: 0 },
+ { id: 9, name: "Luxury Watches", type: "property", color: "#e11d48", price: 28000, rent: 3000, owner: null, buildings: 0 },
+ { id: 10, name: "Art Gallery", type: "property", color: "#e11d48", price: 30000, rent: 3200, owner: null, buildings: 0 },
+ { id: 11, name: "INCOME TAX", type: "tax", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 12, name: "JUST VISITING", type: "jail", color: "#444", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 13, name: "Car Dealership", type: "property", color: "#f59e0b", price: 34000, rent: 3600, owner: null, buildings: 0 },
+ { id: 14, name: "Tech Warehouse", type: "property", color: "#f59e0b", price: 36000, rent: 3800, owner: null, buildings: 0 },
+ { id: 15, name: "Drone Delivery", type: "property", color: "#f59e0b", price: 38000, rent: 4000, owner: null, buildings: 0 },
+ { id: 16, name: "CHANCE", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 17, name: "Logistics Co.", type: "property", color: "#64748b", price: 42000, rent: 4400, owner: null, buildings: 0 },
+ { id: 18, name: "Free Parking", type: "parking", color: "#64748b", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 19, name: "Venture Capital", type: "property", color: "#7c3aed", price: 48000, rent: 5000, owner: null, buildings: 0 },
+ { id: 20, name: "Stock Exchange", type: "property", color: "#7c3aed", price: 52000, rent: 5500, owner: null, buildings: 0 },
+ { id: 21, name: "GO TO JAIL", type: "gotojail", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 22, name: "Biotech Lab", type: "property", color: "#10b981", price: 58000, rent: 6000, owner: null, buildings: 0 },
+ { id: 23, name: "Crypto Exchange", type: "property", color: "#10b981", price: 62000, rent: 6500, owner: null, buildings: 0 }
+ ];
+
+ const characterTemplates = [
+ { id: "owl", name: "Owl", emoji: "🦉", color: "#a5b4fc", trait: "Strategic", rentPaidMod: 1.0, rentReceivedMod: 1.0, incomeBonus: 0.10, aggression: 0.45, buildTendency: 0.75 },
+ { id: "wolf", name: "Wolf", emoji: "🐺", color: "#f87171", trait: "Aggressive", rentPaidMod: 0.80, rentReceivedMod: 1.0, incomeBonus: 0.0, aggression: 0.90, buildTendency: 0.55 },
+ { id: "bear", name: "Bear", emoji: "🐻", color: "#78716c", trait: "Defensive", rentPaidMod: 1.0, rentReceivedMod: 0.75,incomeBonus: 0.0, aggression: 0.25, buildTendency: 0.85 },
+ { id: "bull", name: "Bull", emoji: "🐂", color: "#fbbf24", trait: "Growth", rentPaidMod: 1.0, rentReceivedMod: 1.0, incomeBonus: 0.25, aggression: 0.70, buildTendency: 0.65 }
+ ];
+
+ // Game State
+ let gameMode = 1;
+ let allPlayers = [];
+ let currentPlayerIndex = 0;
+ let currentPosition = 0;
+ let isMoving = false;
+ let gameOver = false;
+
+ // DOM
+ const board = document.getElementById('board');
+ const logEl = document.getElementById('log');
+ const rollBtn = document.getElementById('roll-btn');
+ const actionPanel = document.getElementById('action-panel');
+ const landedTitle = document.getElementById('landed-title');
+ const actionContent = document.getElementById('action-content');
+ const turnIndicator = document.getElementById('turn-indicator');
+ const playerListEl = document.getElementById('player-list');
+ const charactersGrid = document.getElementById('characters-grid');
+ const winScreen = document.getElementById('win-screen');
+
+ let selectedCharacters = [];
+
+ // ==================== CREATE BOARD ====================
+ function createBoard() {
+ board.innerHTML = `
+ <div class="center-circle">
+ <div class="logo">🦉</div>
+ <h1>CEO BATTLE<br>LAST STAND</h1>
+ <div class="tagline">SamOwl Games</div>
+ </div>`;
+ const radius = 225, centerX = 290, centerY = 290;
+
+ spaces.forEach((space, i) => {
+ const angleDeg = (i * (360 / 24)) - 90;
+ const angleRad = angleDeg * Math.PI / 180;
+ const x = centerX + radius * Math.cos(angleRad);
+ const y = centerY + radius * Math.sin(angleRad);
+
+ const el = document.createElement('div');
+ el.className = `space ${space.type}`;
+ el.style.left = `${x - 27}px`;
+ el.style.top = `${y - 38}px`;
+ el.innerHTML = `
+ <div class="name">${space.name}</div>
+ ${space.type === 'property' ? `<div class="price">$${Math.round(space.price/1000)}k</div>` : ''}
+ `;
+ el.dataset.id = space.id;
+ board.appendChild(el);
+ });
+ }
+
+ // ==================== MODE SELECTION ====================
+ document.querySelectorAll('.mode-btn').forEach(btn => {
+ btn.addEventListener('click', () => {
+ document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+ btn.classList.add('active');
+ gameMode = parseInt(btn.dataset.mode);
+ renderCharacterSelection();
+ });
+ });
+
+ function renderCharacterSelection() {
+ charactersGrid.innerHTML = '';
+ characterTemplates.forEach(char => {
+ const card = document.createElement('div');
+ card.className = 'character-card';
+ card.innerHTML = `
+ <div class="emoji">${char.emoji}</div>
+ <div class="name">${char.name}</div>
+ <div class="trait">${char.trait}</div>
+ `;
+ card.onclick = () => toggleCharacterSelection(char, card);
+ charactersGrid.appendChild(card);
+ });
+ }
+
+ function toggleCharacterSelection(char, card) {
+ if (selectedCharacters.includes(char)) {
+ selectedCharacters = selectedCharacters.filter(c => c !== char);
+ card.classList.remove('selected');
+ } else if (selectedCharacters.length < gameMode) {
+ selectedCharacters.push(char);
+ card.classList.add('selected');
+ }
+
+ if (selectedCharacters.length === gameMode) {
+ startGame();
+ }
+ }
+
+ function startGame() {
+ allPlayers = [];
+
+ // Create Human Players
+ selectedCharacters.forEach((char, index) => {
+ allPlayers.push({
+ id: `human${index}`,
+ name: char.name,
+ emoji: char.emoji,
+ color: char.color,
+ cash: 28000,
+ properties: [],
+ isHuman: true,
+ position: 0,
+ rentPaidMod: char.rentPaidMod,
+ rentReceivedMod: char.rentReceivedMod,
+ incomeBonus: char.incomeBonus
+ });
+ });
+
+ // Fill remaining slots with AI
+ const remaining = 4 - gameMode;
+ const availableAI = characterTemplates.filter(c => !selectedCharacters.includes(c));
+
+ for (let i = 0; i < remaining; i++) {
+ const aiChar = availableAI[i % availableAI.length];
+ allPlayers.push({
+ id: `ai${i}`,
+ name: aiChar.name,
+ emoji: aiChar.emoji,
+ color: aiChar.color,
+ cash: 26000,
+ properties: [],
+ isHuman: false,
+ position: 0,
+ rentPaidMod: aiChar.rentPaidMod,
+ rentReceivedMod: aiChar.rentReceivedMod,
+ incomeBonus: aiChar.incomeBonus,
+ aggression: aiChar.aggression,
+ buildTendency: aiChar.buildTendency
+ });
+ }
+
+ createBoard();
+ renderPlayerList();
+ currentPlayerIndex = 0;
+ updateTurnIndicator();
+ rollBtn.disabled = !allPlayers[0].isHuman;
+ logEl.innerHTML = `Game started with ${gameMode} human player(s)!<br>`;
+ }
+
+ function renderPlayerList() {
+ playerListEl.innerHTML = allPlayers.map((p, i) => `
+ <div class="player-item" style="border-left: 4px solid ${p.color}">
+ <span style="font-size:22px">${p.emoji}</span>
+ <div>
+ <strong>${p.name}</strong> ${p.isHuman ? '' : '(AI)'}<br>
+ <small>$${p.cash.toLocaleString()}</small>
+ </div>
+ </div>
+ `).join('');
+ }
+
+ function updateTurnIndicator() {
+ const current = allPlayers[currentPlayerIndex];
+ turnIndicator.innerHTML = `
+ <span style="color:${current.color}">${current.emoji}</span> 
+ ${current.name}'s Turn ${current.isHuman ? '' : '(AI)'}
+ `;
+ }
+
+ // ==================== MOVEMENT & TURN LOGIC ====================
+ async function moveToken(steps, player) {
+ isMoving = true;
+ for (let i = 0; i < steps; i++) {
+ player.position = (player.position + 1) % 24;
+ await new Promise(r => setTimeout(r, 150));
+ }
+ handleLanding(player);
+ isMoving = false;
+ }
+
+ function rollDice() {
+ const currentPlayer = allPlayers[currentPlayerIndex];
+ if (!currentPlayer.isHuman || isMoving || gameOver) return;
+
+ rollBtn.disabled = true;
+ let count = 0;
+ const interval = setInterval(() => {
+ document.getElementById('die1').textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
+ document.getElementById('die2').textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
+ count++;
+ if (count > 10) {
+ clearInterval(interval);
+ const total = Math.floor(Math.random()*8) + 5;
+ document.getElementById('roll-result').innerHTML = `🎲 <strong>${total}</strong>`;
+ logEl.innerHTML += `${currentPlayer.emoji} ${currentPlayer.name} rolled <strong>${total}</strong>!<br>`;
+ moveToken(total, currentPlayer).then(() => {
+ rollBtn.disabled = false;
+ });
+ }
+ }, 50);
+ }
+
+ function handleLanding(player) {
+ const space = spaces[player.position];
+ landedTitle.textContent = `LANDED ON ${space.name.toUpperCase()}`;
+ actionPanel.style.display = 'block';
+
+ if (space.type === "property") {
+ if (!space.owner) {
+ actionContent.innerHTML = `
+ <p>Price: <strong>$${space.price.toLocaleString()}</strong></p>
+ <button class="action-btn buy-btn" onclick="buyProperty(${player.position})">BUY</button>
+ <button class="action-btn pass-btn" onclick="endTurn()">PASS</button>
+ `;
+ } else if (space.owner === player.id) {
+ actionContent.innerHTML = `
+ <button class="action-btn build-btn" onclick="buildOnProperty(${player.position})">BUILD</button>
+ <button class="action-btn pass-btn" onclick="endTurn()">END TURN</button>
+ `;
+ } else {
+ const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
+ player.cash -= rentDue;
+ logEl.innerHTML += `Paid $${rentDue} rent.<br>`;
+ actionContent.innerHTML = `<button class="action-btn pass-btn" onclick="endTurn()">CONTINUE</button>`;
+ }
+ } else if (space.type === "chance" || space.type === "chest") {
+ logEl.innerHTML += `Drew a card!<br>`;
+ player.cash += Math.random() > 0.5 ? 12000 : -8000;
+ actionContent.innerHTML = `<button class="action-btn pass-btn" onclick="endTurn()">CONTINUE</button>`;
+ } else {
+ actionContent.innerHTML = `<button class="action-btn pass-btn" onclick="endTurn()">END TURN</button>`;
+ }
+
+ renderPlayerList();
+ checkWinCondition();
+ }
+
+ window.buyProperty = function(pos) {
+ const current = allPlayers[currentPlayerIndex];
+ const space = spaces[pos];
+ if (current.cash >= space.price) {
+ current.cash -= space.price;
+ space.owner = current.id;
+ current.properties.push(space);
+ logEl.innerHTML += `${current.emoji} bought <strong>${space.name}</strong>!<br>`;
+ }
+ endTurn();
+ };
+
+ window.buildOnProperty = function(pos) {
+ const current = allPlayers[currentPlayerIndex];
+ const space = spaces[pos];
+ const cost = 9000 + space.buildings * 6000;
+ if (current.cash >= cost) {
+ current.cash -= cost;
+ space.buildings++;
+ logEl.innerHTML += `${current.emoji} upgraded ${space.name}!<br>`;
+ }
+ endTurn();
+ };
+
+ window.endTurn = function() {
+ actionPanel.style.display = 'none';
+ currentPlayerIndex = (currentPlayerIndex + 1) % allPlayers.length;
+ updateTurnIndicator();
+ renderPlayerList();
+
+ const nextPlayer = allPlayers[currentPlayerIndex];
+ rollBtn.disabled = !nextPlayer.isHuman;
+
+ if (!nextPlayer.isHuman) {
+ setTimeout(aiTurn, 600);
+ }
+ };
+
+ function aiTurn() {
+ const ai = allPlayers[currentPlayerIndex];
+ const roll = Math.floor(Math.random() * 8) + 5;
+ logEl.innerHTML += `${ai.emoji} ${ai.name} rolled ${roll}!<br>`;
+ moveToken(roll, ai).then(() => {
+ endTurn();
+ });
+ }
+
+ function checkWinCondition() {
+ const alive = allPlayers.filter(p => p.cash > 0);
+ if (alive.length <= 1) {
+ gameOver = true;
+ winScreen.style.display = 'flex';
+ document.getElementById('win-title').textContent = alive.length === 1 ? "🏆 VICTORY!" : "DRAW";
+ document.getElementById('win-name').textContent = alive.length === 1 ? alive[0].emoji + " " + alive[0].name : "";
+ document.getElementById('win-subtitle').textContent = alive.length === 1 ? "is the last CEO standing!" : "Everyone went bankrupt!";
+ }
+ }
+
+ // Keyboard support
+ document.addEventListener('keydown', e => {
+ if (e.key === " " && !isMoving && !gameOver) rollDice();
+ });
+
+ // Init
+ function init() {
+ createBoard();
+ renderCharacterSelection();
+ rollBtn.addEventListener('click', rollDice);
+ logEl.innerHTML = "Choose game mode and select your CEOs to begin the battle!";
+ }
+
+ window.onload = init;
+ </script>
+</body>
+</html>
