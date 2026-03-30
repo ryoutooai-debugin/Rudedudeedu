@@ -1,596 +1,628 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CEO Battle: Last Stand</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-        :root {
-            --gold: #ffd700;
-            --accent: #00ff9d;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            background: #0a0a0a;
-            color: white;
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .game-container {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            height: 100vh;
-            padding: 10px;
-        }
-        .board-wrapper {
-            flex: 1;
-            max-width: 820px;
-            height: 680px;
-            background: #111;
-            border-radius: 32px;
-            box-shadow: 0 0 90px -20px #ffd700;
-            position: relative;
-            padding: 25px;
-        }
-        #board {
-            width: 100%;
-            height: 100%;
-            background: #1a1a1a;
-            border: 20px solid #222;
-            border-radius: 22px;
-            position: relative;
-            overflow: hidden;
-        }
-        .center-circle {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
-            background: #111;
-            border: 16px solid #ffd700;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            box-shadow: 0 0 50px rgba(255,215,0,0.6);
-        }
-        .center-circle h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 26px;
-            color: #ffd700;
-        }
-        .space {
-            position: absolute;
-            background: #222;
-            border: 3px solid #444;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 8.8px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
-            padding: 4px;
-        }
-        .space.owned { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
-        .token {
-            position: absolute;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            z-index: 30;
-            transition: all 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .side-panel {
-            width: 235px;
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
-        .panel {
-            background: #111;
-            border: 2px solid #333;
-            border-radius: 14px;
-            padding: 10px;
-        }
-        .mode-btn {
-            padding: 6px 10px;
-            margin: 2px;
-            background: #1f1f1f;
-            border: 2px solid #444;
-            border-radius: 9999px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .mode-btn.active {
-            background: var(--accent);
-            color: #000;
-        }
-        .characters-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-        }
-        .character-card {
-            background: #1f1f1f;
-            border: 3px solid #444;
-            border-radius: 10px;
-            padding: 6px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .character-card.selected {
-            border-color: var(--accent);
-        }
-        .character-card div:first-child { font-size: 28px; }
-        .player-list {
-            max-height: 125px;
-            overflow-y: auto;
-        }
-        .player-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #1f1f1f;
-            padding: 6px;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            font-size: 12.5px;
-        }
-        .dice-container {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin: 10px 0;
-        }
-        .die {
-            width: 52px;
-            height: 52px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-        }
-        .roll-btn {
-            background: linear-gradient(90deg, #ffd700, #ffea80);
-            color: #111;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 17px;
-            font-weight: 700;
-            padding: 11px;
-            border: none;
-            border-radius: 9999px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .roll-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .log {
-            background: #0a0a0a;
-            border-radius: 10px;
-            padding: 10px;
-            height: 90px;
-            overflow-y: auto;
-            font-size: 12px;
-            color: #00ff9d;
-        }
-        .turn-indicator {
-            text-align: center;
-            font-size: 14.5px;
-            font-weight: 700;
-            padding: 9px;
-            background: #1f1f1f;
-            border-radius: 10px;
-        }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>SamOwl CEO Battle</title>
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+ :root {
+ --gold: #ffd700;
+ --accent: #00ff9d;
+ --owl-gold: #b8860b;
+ }
+ * { margin:0; padding:0; box-sizing:border-box; }
+ body {
+ background: #0a0a0a;
+ color: white;
+ font-family: 'Inter', sans-serif;
+ height: 100vh;
+ overflow: hidden;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ }
+ .game-container {
+ display: flex;
+ gap: 12px;
+ width: 100%;
+ height: 100vh;
+ padding: 10px;
+ }
+ .board-wrapper {
+ flex: 1;
+ max-width: 820px;
+ height: 680px;
+ background: #111;
+ border-radius: 32px;
+ box-shadow: 0 0 90px -20px #ffd700;
+ position: relative;
+ padding: 25px;
+ }
+ #board {
+ width: 100%;
+ height: 100%;
+ background: #1a1a1a;
+ border: 20px solid #222;
+ border-radius: 22px;
+ position: relative;
+ overflow: hidden;
+ }
+ .center-circle {
+ position: absolute;
+ top: 50%; left: 50%;
+ transform: translate(-50%, -50%);
+ width: 200px;
+ height: 200px;
+ background: #111;
+ border: 16px solid #ffd700;
+ border-radius: 50%;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ z-index: 20;
+ box-shadow: 0 0 50px rgba(255,215,0,0.6);
+ }
+ .center-circle .owl-emoji {
+ font-size: 52px;
+ margin-bottom: -5px;
+ }
+ .center-circle h1 {
+ font-family: 'Space Grotesk', sans-serif;
+ font-size: 22px;
+ color: #ffd700;
+ margin: 0;
+ }
+ .center-circle .brand {
+ font-size: 10px;
+ color: #888;
+ margin-top: 2px;
+ }
+ .center-circle p {
+ font-size: 11px;
+ color: #666;
+ margin: 0;
+ }
+ .space {
+ position: absolute;
+ background: #222;
+ border: 3px solid #444;
+ border-radius: 8px;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ text-align: center;
+ font-size: 8.8px;
+ font-weight: 600;
+ box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+ padding: 4px;
+ }
+ .space.owned { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
+ .token {
+ position: absolute;
+ width: 38px;
+ height: 38px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 26px;
+ z-index: 30;
+ transition: all 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+ }
+ .side-panel {
+ width: 235px;
+ display: flex;
+ flex-direction: column;
+ gap: 9px;
+ }
+ .panel {
+ background: #111;
+ border: 2px solid #333;
+ border-radius: 14px;
+ padding: 10px;
+ }
+ .panel.branded {
+ border-color: #ffd700;
+ }
+ .panel.branded h3 {
+ color: #ffd700;
+ text-align: center;
+ }
+ .mode-btn {
+ padding: 6px 10px;
+ margin: 2px;
+ background: #1f1f1f;
+ border: 2px solid #444;
+ border-radius: 9999px;
+ cursor: pointer;
+ font-size: 12px;
+ }
+ .mode-btn.active {
+ background: var(--accent);
+ color: #000;
+ }
+ .characters-grid {
+ display: grid;
+ grid-template-columns: repeat(2, 1fr);
+ gap: 6px;
+ }
+ .character-card {
+ background: #1f1f1f;
+ border: 3px solid #444;
+ border-radius: 10px;
+ padding: 6px;
+ text-align: center;
+ cursor: pointer;
+ }
+ .character-card.selected {
+ border-color: var(--accent);
+ }
+ .character-card div:first-child { font-size: 28px; }
+ .player-list {
+ max-height: 125px;
+ overflow-y: auto;
+ }
+ .player-item {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ background: #1f1f1f;
+ padding: 6px;
+ border-radius: 8px;
+ margin-bottom: 5px;
+ font-size: 12.5px;
+ }
+ .dice-container {
+ display: flex;
+ justify-content: center;
+ gap: 16px;
+ margin: 10px 0;
+ }
+ .die {
+ width: 52px;
+ height: 52px;
+ background: white;
+ border-radius: 8px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 32px;
+ }
+ .roll-btn {
+ background: linear-gradient(90deg, #ffd700, #ffea80);
+ color: #111;
+ font-family: 'Space Grotesk', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ padding: 11px;
+ border: none;
+ border-radius: 9999px;
+ cursor: pointer;
+ width: 100%;
+ }
+ .roll-btn:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ }
+ .log {
+ background: #0a0a0a;
+ border-radius: 10px;
+ padding: 10px;
+ height: 90px;
+ overflow-y: auto;
+ font-size: 12px;
+ color: #00ff9d;
+ }
+ .turn-indicator {
+ text-align: center;
+ font-size: 14.5px;
+ font-weight: 700;
+ padding: 9px;
+ background: #1f1f1f;
+ border-radius: 10px;
+ }
+ .samowl-footer {
+ text-align: center;
+ padding: 8px;
+ font-size: 10px;
+ color: #666;
+ }
+ .samowl-footer a {
+ color: #ffd700;
+ text-decoration: none;
+ }
+ </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="board-wrapper">
-            <div id="board"></div>
-        </div>
-        <div class="side-panel">
-            <div class="panel">
-                <div style="text-align:center;">
-                    <h2 style="font-size:15px;margin-bottom:6px;">GAME MODE</h2>
-                    <button class="mode-btn active" data-mode="1">Solo</button>
-                    <button class="mode-btn" data-mode="2">2P</button>
-                    <button class="mode-btn" data-mode="3">3P</button>
-                    <button class="mode-btn" data-mode="4">4P</button>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 style="margin-bottom:6px;font-size:14px;">CHOOSE CEOS</h3>
-                <div class="characters-grid" id="characters-grid"></div>
-            </div>
-            <div class="panel">
-                <h3 style="margin-bottom:6px;font-size:14px;">PLAYERS</h3>
-                <div class="player-list" id="player-list"></div>
-            </div>
-            <div class="turn-indicator" id="turn-indicator">Select mode & CEOs</div>
-            <div class="panel action-panel" id="action-panel" style="display:none;">
-                <h3 id="landed-title">LANDED ON...</h3>
-                <div id="action-content"></div>
-            </div>
-            <div class="panel">
-                <h2 style="margin-bottom:6px;font-size:15px;">ROLL TO MOVE</h2>
-                <div class="dice-container">
-                    <div class="die" id="die1">⚅</div>
-                    <div class="die" id="die2">⚄</div>
-                </div>
-                <button id="roll-btn" class="roll-btn" disabled>ROLL DICE</button>
-                <div id="roll-result" style="text-align:center; margin:8px 0; font-size:19px; font-weight:700;"></div>
-                <div class="log" id="log">+$500 CEO HQ • Rent to owners • Stock cards active</div>
-            </div>
-        </div>
-    </div>
-    <script>
-        let spaces = [
-            { id: 0, name: "CEO HQ", type: "go", color: "#22c55e", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 1, name: "Corner Coffee Shop", type: "property", color: "#854d0e", price: 8000, rent: 800, owner: null, buildings: 0 },
-            { id: 2, name: "Local Bakery", type: "property", color: "#854d0e", price: 9500, rent: 950, owner: null, buildings: 0 },
-            { id: 3, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 4, name: "Neighborhood Gym", type: "property", color: "#0ea5e9", price: 11000, rent: 1100, owner: null, buildings: 0 },
-            { id: 5, name: "Book Nook", type: "property", color: "#0ea5e9", price: 12500, rent: 1250, owner: null, buildings: 0 },
-            { id: 6, name: "Pet Supply Store", type: "property", color: "#0ea5e9", price: 14000, rent: 1400, owner: null, buildings: 0 },
-            { id: 7, name: "STOCK LOSS", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 8, name: "Fashion Boutique", type: "property", color: "#e11d48", price: 16500, rent: 1650, owner: null, buildings: 0 },
-            { id: 9, name: "Luxury Watches", type: "property", color: "#e11d48", price: 19500, rent: 1950, owner: null, buildings: 0 },
-            { id: 10, name: "Art Gallery", type: "property", color: "#e11d48", price: 22000, rent: 2200, owner: null, buildings: 0 },
-            { id: 11, name: "Income Tax", type: "tax", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 12, name: "Just Visiting", type: "jail", color: "#444", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 13, name: "Car Dealership", type: "property", color: "#f59e0b", price: 28000, rent: 2800, owner: null, buildings: 0 },
-            { id: 14, name: "Tech Warehouse", type: "property", color: "#f59e0b", price: 31000, rent: 3100, owner: null, buildings: 0 },
-            { id: 15, name: "Drone Delivery", type: "property", color: "#f59e0b", price: 34000, rent: 3400, owner: null, buildings: 0 },
-            { id: 16, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 17, name: "Global Logistics", type: "property", color: "#64748b", price: 38000, rent: 3800, owner: null, buildings: 0 },
-            { id: 18, name: "Free Parking", type: "parking", color: "#64748b", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 19, name: "Venture Capital", type: "property", color: "#7c3aed", price: 45000, rent: 4500, owner: null, buildings: 0 },
-            { id: 20, name: "Stock Exchange", type: "property", color: "#7c3aed", price: 52000, rent: 5200, owner: null, buildings: 0 },
-            { id: 21, name: "GO TO SCHOOL", type: "gotojail", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 22, name: "Biotech Lab", type: "property", color: "#10b981", price: 58000, rent: 5800, owner: null, buildings: 0 },
-            { id: 23, name: "Crypto Exchange", type: "property", color: "#10b981", price: 63000, rent: 6300, owner: null, buildings: 0 },
-            { id: 24, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 25, name: "Solar Energy Co.", type: "property", color: "#10b981", price: 41000, rent: 4100, owner: null, buildings: 0 },
-            { id: 26, name: "Online Marketplace", type: "property", color: "#7c3aed", price: 47000, rent: 4700, owner: null, buildings: 0 },
-            { id: 27, name: "Private Jet Charter", type: "property", color: "#e11d48", price: 71000, rent: 7100, owner: null, buildings: 0 },
-            { id: 28, name: "STOCK LOSS", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 29, name: "Digital Media Firm", type: "property", color: "#e11d48", price: 39000, rent: 3900, owner: null, buildings: 0 },
-            { id: 30, name: "Pharma Research", type: "property", color: "#10b981", price: 54000, rent: 5400, owner: null, buildings: 0 },
-            { id: 31, name: "Luxury Resort", type: "property", color: "#e11d48", price: 68000, rent: 6800, owner: null, buildings: 0 },
-            { id: 32, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
-            { id: 33, name: "Media Studio", type: "property", color: "#e11d48", price: 42000, rent: 4200, owner: null, buildings: 0 },
-            { id: 34, name: "E-commerce Hub", type: "property", color: "#7c3aed", price: 49000, rent: 4900, owner: null, buildings: 0 },
-            { id: 35, name: "Private Bank", type: "property", color: "#e11d48", price: 65000, rent: 6500, owner: null, buildings: 0 }
-        ];
-        const characterTemplates = [
-            { id: "owl", name: "Owl", emoji: "🦉", color: "#a5b4fc", aggression: 0.5, buildTendency: 0.75 },
-            { id: "wolf", name: "Wolf", emoji: "🐺", color: "#f87171", aggression: 0.85, buildTendency: 0.6 },
-            { id: "bear", name: "Bear", emoji: "🐻", color: "#78716c", aggression: 0.3, buildTendency: 0.85 },
-            { id: "bull", name: "Bull", emoji: "🐂", color: "#fbbf24", aggression: 0.7, buildTendency: 0.65 }
-        ];
-        let gameMode = 1;
-        let allPlayers = [];
-        let currentPlayerIndex = 0;
-        let isMoving = false;
-        let selectedCharacters = [];
-        const board = document.getElementById('board');
-        const logEl = document.getElementById('log');
-        const rollBtn = document.getElementById('roll-btn');
-        const actionPanel = document.getElementById('action-panel');
-        const landedTitle = document.getElementById('landed-title');
-        const actionContent = document.getElementById('action-content');
-        const turnIndicator = document.getElementById('turn-indicator');
-        const playerListEl = document.getElementById('player-list');
-        const charactersGrid = document.getElementById('characters-grid');
+ <div class="game-container">
+ <div class="board-wrapper">
+ <div id="board"></div>
+ </div>
+ <div class="side-panel">
+ <div class="panel branded">
+ <h3>🦉 SamOwl CEO Battle</h3>
+ </div>
+ <div class="panel">
+ <div style="text-align:center;">
+ <h2 style="font-size:15px;margin-bottom:6px;">GAME MODE</h2>
+ <button class="mode-btn active" data-mode="1">Solo</button>
+ <button class="mode-btn" data-mode="2">2P</button>
+ <button class="mode-btn" data-mode="3">3P</button>
+ <button class="mode-btn" data-mode="4">4P</button>
+ </div>
+ </div>
+ <div class="panel">
+ <h3 style="margin-bottom:6px;font-size:14px;">CHOOSE CEOS</h3>
+ <div class="characters-grid" id="characters-grid"></div>
+ </div>
+ <div class="panel">
+ <h3 style="margin-bottom:6px;font-size:14px;">PLAYERS</h3>
+ <div class="player-list" id="player-list"></div>
+ </div>
+ <div class="turn-indicator" id="turn-indicator">Select mode & CEOs</div>
+ <div class="panel action-panel" id="action-panel" style="display:none;">
+ <h3 id="landed-title">LANDED ON...</h3>
+ <div id="action-content"></div>
+ </div>
+ <div class="panel">
+ <h2 style="margin-bottom:6px;font-size:15px;">ROLL TO MOVE</h2>
+ <div class="dice-container">
+ <div class="die" id="die1">⚅</div>
+ <div class="die" id="die2">⚄</div>
+ </div>
+ <button id="roll-btn" class="roll-btn" disabled>ROLL DICE</button>
+ <div id="roll-result" style="text-align:center; margin:8px 0; font-size:19px; font-weight:700;"></div>
+ <div class="log" id="log">+$500 CEO HQ • Rent to owners • Stock cards active</div>
+ </div>
+ <div class="samowl-footer">
+ <a href="https://samowl.net/games/" target="_blank">More SamOwl Games →</a>
+ </div>
+ </div>
+ </div>
+ <script>
+ let spaces = [
+ { id: 0, name: "CEO HQ", type: "go", color: "#22c55e", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 1, name: "Corner Coffee Shop", type: "property", color: "#854d0e", price: 8000, rent: 800, owner: null, buildings: 0 },
+ { id: 2, name: "Local Bakery", type: "property", color: "#854d0e", price: 9500, rent: 950, owner: null, buildings: 0 },
+ { id: 3, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 4, name: "Neighborhood Gym", type: "property", color: "#0ea5e9", price: 11000, rent: 1100, owner: null, buildings: 0 },
+ { id: 5, name: "Book Nook", type: "property", color: "#0ea5e9", price: 12500, rent: 1250, owner: null, buildings: 0 },
+ { id: 6, name: "Pet Supply Store", type: "property", color: "#0ea5e9", price: 14000, rent: 1400, owner: null, buildings: 0 },
+ { id: 7, name: "STOCK LOSS", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 8, name: "Fashion Boutique", type: "property", color: "#e11d48", price: 16500, rent: 1650, owner: null, buildings: 0 },
+ { id: 9, name: "Luxury Watches", type: "property", color: "#e11d48", price: 19500, rent: 1950, owner: null, buildings: 0 },
+ { id: 10, name: "Art Gallery", type: "property", color: "#e11d48", price: 22000, rent: 2200, owner: null, buildings: 0 },
+ { id: 11, name: "Income Tax", type: "tax", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 12, name: "Just Visiting", type: "jail", color: "#444", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 13, name: "Car Dealership", type: "property", color: "#f59e0b", price: 28000, rent: 2800, owner: null, buildings: 0 },
+ { id: 14, name: "Tech Warehouse", type: "property", color: "#f59e0b", price: 31000, rent: 3100, owner: null, buildings: 0 },
+ { id: 15, name: "Drone Delivery", type: "property", color: "#f59e0b", price: 34000, rent: 3400, owner: null, buildings: 0 },
+ { id: 16, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 17, name: "Global Logistics", type: "property", color: "#64748b", price: 38000, rent: 3800, owner: null, buildings: 0 },
+ { id: 18, name: "Free Parking", type: "parking", color: "#64748b", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 19, name: "Venture Capital", type: "property", color: "#7c3aed", price: 45000, rent: 4500, owner: null, buildings: 0 },
+ { id: 20, name: "Stock Exchange", type: "property", color: "#7c3aed", price: 52000, rent: 5200, owner: null, buildings: 0 },
+ { id: 21, name: "GO TO SCHOOL", type: "gotojail", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 22, name: "Biotech Lab", type: "property", color: "#10b981", price: 58000, rent: 5800, owner: null, buildings: 0 },
+ { id: 23, name: "Crypto Exchange", type: "property", color: "#10b981", price: 63000, rent: 6300, owner: null, buildings: 0 },
+ { id: 24, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 25, name: "Solar Energy Co.", type: "property", color: "#10b981", price: 41000, rent: 4100, owner: null, buildings: 0 },
+ { id: 26, name: "Online Marketplace", type: "property", color: "#7c3aed", price: 47000, rent: 4700, owner: null, buildings: 0 },
+ { id: 27, name: "Private Jet Charter", type: "property", color: "#e11d48", price: 71000, rent: 7100, owner: null, buildings: 0 },
+ { id: 28, name: "STOCK LOSS", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 29, name: "Digital Media Firm", type: "property", color: "#e11d48", price: 39000, rent: 3900, owner: null, buildings: 0 },
+ { id: 30, name: "Pharma Research", type: "property", color: "#10b981", price: 54000, rent: 5400, owner: null, buildings: 0 },
+ { id: 31, name: "Luxury Resort", type: "property", color: "#e11d48", price: 68000, rent: 6800, owner: null, buildings: 0 },
+ { id: 32, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+ { id: 33, name: "Media Studio", type: "property", color: "#e11d48", price: 42000, rent: 4200, owner: null, buildings: 0 },
+ { id: 34, name: "E-commerce Hub", type: "property", color: "#7c3aed", price: 49000, rent: 4900, owner: null, buildings: 0 },
+ { id: 35, name: "Private Bank", type: "property", color: "#e11d48", price: 65000, rent: 6500, owner: null, buildings: 0 }
+ ];
+ const characterTemplates = [
+ { id: "owl", name: "Owl", emoji: "🦉", color: "#a5b4fc", aggression: 0.5, buildTendency: 0.75 },
+ { id: "wolf", name: "Wolf", emoji: "🐺", color: "#f87171", aggression: 0.85, buildTendency: 0.6 },
+ { id: "bear", name: "Bear", emoji: "🐻", color: "#78716c", aggression: 0.3, buildTendency: 0.85 },
+ { id: "bull", name: "Bull", emoji: "🐂", color: "#fbbf24", aggression: 0.7, buildTendency: 0.65 }
+ ];
+ let gameMode = 1;
+ let allPlayers = [];
+ let currentPlayerIndex = 0;
+ let isMoving = false;
+ let selectedCharacters = [];
+ const board = document.getElementById('board');
+ const logEl = document.getElementById('log');
+ const rollBtn = document.getElementById('roll-btn');
+ const actionPanel = document.getElementById('action-panel');
+ const landedTitle = document.getElementById('landed-title');
+ const actionContent = document.getElementById('action-content');
+ const turnIndicator = document.getElementById('turn-indicator');
+ const playerListEl = document.getElementById('player-list');
+ const charactersGrid = document.getElementById('characters-grid');
 
-        function createBoard() {
-            board.innerHTML = `<div class="center-circle"><h1>CEO BATTLE</h1><p>36 SPACES</p></div>`;
-            const positions = [];
-            for (let i = 0; i < 9; i++) positions.push({x: 70 + i*68, y: 48});
-            for (let i = 0; i < 9; i++) positions.push({x: 670, y: 95 + i*52});
-            for (let i = 0; i < 9; i++) positions.push({x: 600 - i*68, y: 515});
-            for (let i = 0; i < 9; i++) positions.push({x: 48, y: 480 - i*52});
-            spaces.forEach((space, i) => {
-                const pos = positions[i];
-                const el = document.createElement('div');
-                el.className = `space ${space.type}`;
-                el.style.left = `${pos.x}px`;
-                el.style.top = `${pos.y}px`;
-                el.innerHTML = `<div style="font-size:8.8px;">${space.name}</div>`;
-                if (space.type === 'property') {
-                    el.innerHTML += `<div style="font-size:7.8px;color:#ffd700;">$${Math.round(space.price/1000)}k</div>`;
-                }
-                el.dataset.id = space.id;
-                board.appendChild(el);
-            });
-        }
+ function createBoard() {
+ board.innerHTML = `<div class="center-circle"><div class="owl-emoji">🦉</div><h1>CEO BATTLE</h1><p class="brand">SamOwl Games</p><p>36 SPACES</p></div>`;
+ const positions = [];
+ for (let i = 0; i < 9; i++) positions.push({x: 70 + i*68, y: 48});
+ for (let i = 0; i < 9; i++) positions.push({x: 670, y: 95 + i*52});
+ for (let i = 0; i < 9; i++) positions.push({x: 600 - i*68, y: 515});
+ for (let i = 0; i < 9; i++) positions.push({x: 48, y: 480 - i*52});
+ spaces.forEach((space, i) => {
+ const pos = positions[i];
+ const el = document.createElement('div');
+ el.className = `space ${space.type}`;
+ el.style.left = `${pos.x}px`;
+ el.style.top = `${pos.y}px`;
+ el.innerHTML = `<div style="font-size:8.8px;">${space.name}</div>`;
+ if (space.type === 'property') {
+ el.innerHTML += `<div style="font-size:7.8px;color:#ffd700;">$${Math.round(space.price/1000)}k</div>`;
+ }
+ el.dataset.id = space.id;
+ board.appendChild(el);
+ });
+ }
 
-        function positionToken(player) {
-            const spaceEls = board.querySelectorAll('.space');
-            const target = Array.from(spaceEls).find(s => parseInt(s.dataset.id) === player.position);
-            if (!target) return;
-            const rect = target.getBoundingClientRect();
-            const boardRect = board.getBoundingClientRect();
-            const tx = rect.left - boardRect.left + rect.width/2 - 19;
-            const ty = rect.top - boardRect.top + rect.height/2 - 19;
-            let token = document.getElementById(`token-${player.id}`);
-            if (!token) {
-                token = document.createElement('div');
-                token.className = 'token';
-                token.id = `token-${player.id}`;
-                token.textContent = player.emoji;
-                board.appendChild(token);
-            }
-            token.style.left = `${tx}px`;
-            token.style.top = `${ty}px`;
-        }
+ function positionToken(player) {
+ const spaceEls = board.querySelectorAll('.space');
+ const target = Array.from(spaceEls).find(s => parseInt(s.dataset.id) === player.position);
+ if (!target) return;
+ const rect = target.getBoundingClientRect();
+ const boardRect = board.getBoundingClientRect();
+ const tx = rect.left - boardRect.left + rect.width/2 - 19;
+ const ty = rect.top - boardRect.top + rect.height/2 - 19;
+ let token = document.getElementById(`token-${player.id}`);
+ if (!token) {
+ token = document.createElement('div');
+ token.className = 'token';
+ token.id = `token-${player.id}`;
+ token.textContent = player.emoji;
+ board.appendChild(token);
+ }
+ token.style.left = `${tx}px`;
+ token.style.top = `${ty}px`;
+ }
 
-        function renderCharacterSelection() {
-            charactersGrid.innerHTML = '';
-            characterTemplates.forEach(char => {
-                const card = document.createElement('div');
-                card.className = 'character-card';
-                card.innerHTML = `<div>${char.emoji}</div><div>${char.name}</div>`;
-                card.onclick = () => toggleCharacterSelection(char, card);
-                charactersGrid.appendChild(card);
-            });
-        }
+ function renderCharacterSelection() {
+ charactersGrid.innerHTML = '';
+ characterTemplates.forEach(char => {
+ const card = document.createElement('div');
+ card.className = 'character-card';
+ card.innerHTML = `<div>${char.emoji}</div><div>${char.name}</div>`;
+ card.onclick = () => toggleCharacterSelection(char, card);
+ charactersGrid.appendChild(card);
+ });
+ }
 
-        function toggleCharacterSelection(char, card) {
-            if (selectedCharacters.find(c => c.id === char.id)) {
-                selectedCharacters = selectedCharacters.filter(c => c.id !== char.id);
-                card.classList.remove('selected');
-            } else if (selectedCharacters.length < gameMode) {
-                selectedCharacters.push(char);
-                card.classList.add('selected');
-            }
-            if (selectedCharacters.length === gameMode) startGame();
-        }
+ function toggleCharacterSelection(char, card) {
+ if (selectedCharacters.find(c => c.id === char.id)) {
+ selectedCharacters = selectedCharacters.filter(c => c.id !== char.id);
+ card.classList.remove('selected');
+ } else if (selectedCharacters.length < gameMode) {
+ selectedCharacters.push(char);
+ card.classList.add('selected');
+ }
+ if (selectedCharacters.length === gameMode) startGame();
+ }
 
-        function startGame() {
-            allPlayers = [];
-            selectedCharacters.forEach((char,i) => {
-                allPlayers.push({ id:`p${i}`, name:char.name, emoji:char.emoji, color:char.color, cash:30000, properties:[], isHuman:true, position:0, aggression:char.aggression, buildTendency:char.buildTendency });
-            });
-            const remaining = 4 - gameMode;
-            const aiPool = characterTemplates.filter(c => !selectedCharacters.find(sc => sc.id === c.id));
-            for (let i = 0; i < remaining; i++) {
-                const aiChar = aiPool[i % aiPool.length];
-                allPlayers.push({ id:`ai${i}`, name:aiChar.name, emoji:aiChar.emoji, color:aiChar.color, cash:30000, properties:[], isHuman:false, position:0, aggression:aiChar.aggression, buildTendency:aiChar.buildTendency });
-            }
-            createBoard();
-            allPlayers.forEach(p => positionToken(p));
-            renderPlayerList();
-            currentPlayerIndex = 0;
-            updateTurnIndicator();
-            rollBtn.disabled = false;
-        }
+ function startGame() {
+ allPlayers = [];
+ selectedCharacters.forEach((char,i) => {
+ allPlayers.push({ id:`p${i}`, name:char.name, emoji:char.emoji, color:char.color, cash:30000, properties:[], isHuman:true, position:0, aggression:char.aggression, buildTendency:char.buildTendency });
+ });
+ const remaining = 4 - gameMode;
+ const aiPool = characterTemplates.filter(c => !selectedCharacters.find(sc => sc.id === c.id));
+ for (let i = 0; i < remaining; i++) {
+ const aiChar = aiPool[i % aiPool.length];
+ allPlayers.push({ id:`ai${i}`, name:aiChar.name, emoji:aiChar.emoji, color:aiChar.color, cash:30000, properties:[], isHuman:false, position:0, aggression:aiChar.aggression, buildTendency:aiChar.buildTendency });
+ }
+ createBoard();
+ allPlayers.forEach(p => positionToken(p));
+ renderPlayerList();
+ currentPlayerIndex = 0;
+ updateTurnIndicator();
+ rollBtn.disabled = false;
+ }
 
-        function renderPlayerList() {
-            playerListEl.innerHTML = allPlayers.map(p => `
-                <div class="player-item">
-                    <span style="font-size:24px">${p.emoji}</span>
-                    <div><strong>${p.name}</strong> ${p.isHuman ? '(You)' : '(AI)'}<br>$${p.cash}</div>
-                </div>
-            `).join('');
-        }
+ function renderPlayerList() {
+ playerListEl.innerHTML = allPlayers.map(p => `
+ <div class="player-item">
+ <span style="font-size:24px">${p.emoji}</span>
+ <div><strong>${p.name}</strong> ${p.isHuman ? '(You)' : '(AI)'}<br>$${p.cash}</div>
+ </div>
+ `).join('');
+ }
 
-        function updateTurnIndicator() {
-            const p = allPlayers[currentPlayerIndex];
-            turnIndicator.innerHTML = `<span style="color:${p.color}">${p.emoji}</span> ${p.name}'s Turn`;
-        }
+ function updateTurnIndicator() {
+ const p = allPlayers[currentPlayerIndex];
+ turnIndicator.innerHTML = `<span style="color:${p.color}">${p.emoji}</span> ${p.name}'s Turn`;
+ }
 
-        // FIXED: CEO HQ now triggers on BOTH landing AND passing (checked every step of the move)
-        async function moveToken(player, steps) {
-            if (isMoving) return;
-            isMoving = true;
-            for (let i = 0; i < steps; i++) {
-                player.position = (player.position + 1) % spaces.length;
-                positionToken(player);
-                // Collect $500 when landing on or passing CEO HQ
-                if (player.position === 0) {
-                    player.cash += 500;
-                    logEl.innerHTML += `<span style="color:#22c55e">${player.emoji} ${player.name} → +$500 CEO HQ</span><br>`;
-                }
-                await new Promise(r => setTimeout(r, 160));
-            }
-            handleLanding(player);
-            isMoving = false;
-        }
+ async function moveToken(player, steps) {
+ if (isMoving) return;
+ isMoving = true;
+ for (let i = 0; i < steps; i++) {
+ player.position = (player.position + 1) % spaces.length;
+ positionToken(player);
+ if (player.position === 0) {
+ player.cash += 500;
+ logEl.innerHTML += `<span style="color:#22c55e">${player.emoji} ${player.name} → +$500 CEO HQ</span><br>`;
+ }
+ await new Promise(r => setTimeout(r, 160));
+ }
+ handleLanding(player);
+ isMoving = false;
+ }
 
-        function handleLanding(player) {
-            const space = spaces[player.position];
-            landedTitle.textContent = `LANDED ON ${space.name.toUpperCase()}`;
-            actionPanel.style.display = 'block';
+ function handleLanding(player) {
+ const space = spaces[player.position];
+ landedTitle.textContent = `LANDED ON ${space.name.toUpperCase()}`;
+ actionPanel.style.display = 'block';
 
-            if (player.isHuman) {
-                if (space.type === "property") {
-                    if (!space.owner) {
-                        actionContent.innerHTML = `
-                            <p>Price: <strong>$${space.price}</strong></p>
-                            <button onclick="buyProperty(${player.position})">BUY</button>
-                            <button onclick="endTurn()">PASS</button>
-                        `;
-                    } else if (space.owner === player.id) {
-                        actionContent.innerHTML = `
-                            <button onclick="buildOnProperty(${player.position})">BUILD</button>
-                            <button onclick="endTurn()">END TURN</button>
-                        `;
-                    } else {
-                        // FIXED: Human pays membership fee (rent)
-                        const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
-                        player.cash -= rentDue;
-                        const owner = allPlayers.find(p => p.id === space.owner);
-                        if (owner) owner.cash += rentDue;
-                        logEl.innerHTML += `<span style="color:#f87171">${player.emoji} Paid $${rentDue} membership fee to ${owner ? owner.name : 'owner'}</span><br>`;
-                        actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
-                    }
-                } else if (space.type === "chance") {
-                    drawStockWin(player);
-                    actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
-                } else if (space.type === "chest") {
-                    drawStockLoss(player);
-                    actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
-                } else {
-                    actionContent.innerHTML = `<button onclick="endTurn()">END TURN</button>`;
-                }
-            } else {
-                // AI turn - FIXED: now fully affected by rent, stock win/loss
-                actionContent.innerHTML = `<p style="color:#aaa">AI deciding...</p>`;
-                setTimeout(() => {
-                    const space = spaces[player.position];
-                    if (space.type === "property") {
-                        if (!space.owner) {
-                            aiDecision(player, player.position);
-                        } else if (space.owner !== player.id) {
-                            // FIXED: AI pays membership fee (rent)
-                            const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
-                            player.cash -= rentDue;
-                            const owner = allPlayers.find(p => p.id === space.owner);
-                            if (owner) owner.cash += rentDue;
-                            logEl.innerHTML += `<span style="color:#f87171">${player.emoji} ${player.name} paid $${rentDue} membership fee to ${owner ? owner.name : 'owner'}</span><br>`;
-                        } else if (Math.random() < player.buildTendency) {
-                            // Bonus: smarter AI occasionally builds on own property
-                            const cost = 9000 + space.buildings * 6000;
-                            if (player.cash >= cost) {
-                                player.cash -= cost;
-                                space.buildings++;
-                                logEl.innerHTML += `${player.emoji} ${player.name} upgraded ${space.name}!<br>`;
-                            }
-                        }
-                    } else if (space.type === "chance") {
-                        drawStockWin(player);
-                    } else if (space.type === "chest") {
-                        drawStockLoss(player);
-                    }
-                    endTurn();
-                }, 950);
-            }
-        }
+ if (player.isHuman) {
+ if (space.type === "property") {
+ if (!space.owner) {
+ actionContent.innerHTML = `
+ <p>Price: <strong>$${space.price}</strong></p>
+ <button onclick="buyProperty(${player.position})">BUY</button>
+ <button onclick="endTurn()">PASS</button>
+ `;
+ } else if (space.owner === player.id) {
+ actionContent.innerHTML = `
+ <button onclick="buildOnProperty(${player.position})">BUILD</button>
+ <button onclick="endTurn()">END TURN</button>
+ `;
+ } else {
+ const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
+ player.cash -= rentDue;
+ const owner = allPlayers.find(p => p.id === space.owner);
+ if (owner) owner.cash += rentDue;
+ logEl.innerHTML += `<span style="color:#f87171">${player.emoji} Paid $${rentDue} membership fee to ${owner ? owner.name : 'owner'}</span><br>`;
+ actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
+ }
+ } else if (space.type === "chance") {
+ drawStockWin(player);
+ actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
+ } else if (space.type === "chest") {
+ drawStockLoss(player);
+ actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
+ } else {
+ actionContent.innerHTML = `<button onclick="endTurn()">END TURN</button>`;
+ }
+ } else {
+ actionContent.innerHTML = `<p style="color:#aaa">AI deciding...</p>`;
+ setTimeout(() => {
+ const space = spaces[player.position];
+ if (space.type === "property") {
+ if (!space.owner) {
+ aiDecision(player, player.position);
+ } else if (space.owner !== player.id) {
+ const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
+ player.cash -= rentDue;
+ const owner = allPlayers.find(p => p.id === space.owner);
+ if (owner) owner.cash += rentDue;
+ logEl.innerHTML += `<span style="color:#f87171">${player.emoji} ${player.name} paid $${rentDue} membership fee to ${owner ? owner.name : 'owner'}</span><br>`;
+ } else if (Math.random() < player.buildTendency) {
+ const cost = 9000 + space.buildings * 6000;
+ if (player.cash >= cost) {
+ player.cash -= cost;
+ space.buildings++;
+ logEl.innerHTML += `${player.emoji} ${player.name} upgraded ${space.name}!<br>`;
+ }
+ }
+ } else if (space.type === "chance") {
+ drawStockWin(player);
+ } else if (space.type === "chest") {
+ drawStockLoss(player);
+ }
+ endTurn();
+ }, 950);
+ }
+ }
 
-        function drawStockWin(player) {
-            const amount = Math.floor(Math.random() * 901) + 100;
-            player.cash += amount;
-            logEl.innerHTML += `<span style="color:#22c55e">${player.emoji} ${player.name} STOCK WIN! +$${amount}</span><br>`;
-        }
+ function drawStockWin(player) {
+ const amount = Math.floor(Math.random() * 901) + 100;
+ player.cash += amount;
+ logEl.innerHTML += `<span style="color:#22c55e">${player.emoji} ${player.name} STOCK WIN! +$${amount}</span><br>`;
+ }
 
-        function drawStockLoss(player) {
-            const amount = Math.floor(Math.random() * 650) + 150;
-            player.cash -= amount;
-            logEl.innerHTML += `<span style="color:#f87171">${player.emoji} ${player.name} STOCK LOSS! -$${amount}</span><br>`;
-        }
+ function drawStockLoss(player) {
+ const amount = Math.floor(Math.random() * 650) + 150;
+ player.cash -= amount;
+ logEl.innerHTML += `<span style="color:#f87171">${player.emoji} ${player.name} STOCK LOSS! -$${amount}</span><br>`;
+ }
 
-        function aiDecision(ai, pos) {
-            const space = spaces[pos];
-            if (space.type !== "property" || space.owner) return;
-            if (ai.cash > space.price * 1.15 && Math.random() < ai.aggression) {
-                ai.cash -= space.price;
-                space.owner = ai.id;
-                logEl.innerHTML += `${ai.emoji} ${ai.name} bought <strong>${space.name}</strong>!<br>`;
-                const el = board.querySelector(`.space[data-id="${pos}"]`);
-                if (el) el.classList.add('owned');
-            }
-        }
+ function aiDecision(ai, pos) {
+ const space = spaces[pos];
+ if (space.type !== "property" || space.owner) return;
+ if (ai.cash > space.price * 1.15 && Math.random() < ai.aggression) {
+ ai.cash -= space.price;
+ space.owner = ai.id;
+ logEl.innerHTML += `${ai.emoji} ${ai.name} bought <strong>${space.name}</strong>!<br>`;
+ const el = board.querySelector(`.space[data-id="${pos}"]`);
+ if (el) el.classList.add('owned');
+ }
+ }
 
-        window.buyProperty = function(pos) {
-            const current = allPlayers[currentPlayerIndex];
-            const space = spaces[pos];
-            if (current.cash >= space.price) {
-                current.cash -= space.price;
-                space.owner = current.id;
-                logEl.innerHTML += `${current.emoji} bought ${space.name}!<br>`;
-                const el = board.querySelector(`.space[data-id="${pos}"]`);
-                if (el) el.classList.add('owned');
-            }
-            endTurn();
-        };
+ window.buyProperty = function(pos) {
+ const current = allPlayers[currentPlayerIndex];
+ const space = spaces[pos];
+ if (current.cash >= space.price) {
+ current.cash -= space.price;
+ space.owner = current.id;
+ logEl.innerHTML += `${current.emoji} bought ${space.name}!<br>`;
+ const el = board.querySelector(`.space[data-id="${pos}"]`);
+ if (el) el.classList.add('owned');
+ }
+ endTurn();
+ };
 
-        window.buildOnProperty = function(pos) {
-            const current = allPlayers[currentPlayerIndex];
-            const space = spaces[pos];
-            const cost = 9000 + space.buildings * 6000;
-            if (current.cash >= cost) {
-                current.cash -= cost;
-                space.buildings++;
-                logEl.innerHTML += `${current.emoji} upgraded ${space.name}!<br>`;
-            }
-            endTurn();
-        };
+ window.buildOnProperty = function(pos) {
+ const current = allPlayers[currentPlayerIndex];
+ const space = spaces[pos];
+ const cost = 9000 + space.buildings * 6000;
+ if (current.cash >= cost) {
+ current.cash -= cost;
+ space.buildings++;
+ logEl.innerHTML += `${current.emoji} upgraded ${space.name}!<br>`;
+ }
+ endTurn();
+ };
 
-        window.endTurn = function() {
-            actionPanel.style.display = 'none';
-            currentPlayerIndex = (currentPlayerIndex + 1) % allPlayers.length;
-            updateTurnIndicator();
-            renderPlayerList();
-            const next = allPlayers[currentPlayerIndex];
-            rollBtn.disabled = !next.isHuman;
-            if (!next.isHuman) {
-                setTimeout(() => {
-                    const roll = Math.floor(Math.random() * 8) + 5;
-                    logEl.innerHTML += `${next.emoji} ${next.name} rolled ${roll}!<br>`;
-                    moveToken(next, roll);
-                }, 600);
-            }
-        };
+ window.endTurn = function() {
+ actionPanel.style.display = 'none';
+ currentPlayerIndex = (currentPlayerIndex + 1) % allPlayers.length;
+ updateTurnIndicator();
+ renderPlayerList();
+ const next = allPlayers[currentPlayerIndex];
+ rollBtn.disabled = !next.isHuman;
+ if (!next.isHuman) {
+ setTimeout(() => {
+ const roll = Math.floor(Math.random() * 8) + 5;
+ logEl.innerHTML += `${next.emoji} ${next.name} rolled ${roll}!<br>`;
+ moveToken(next, roll);
+ }, 600);
+ }
+ };
 
-        function rollDice() {
-            const current = allPlayers[currentPlayerIndex];
-            if (!current.isHuman || isMoving) return;
-            rollBtn.disabled = true;
-            let count = 0;
-            const interval = setInterval(() => {
-                document.getElementById('die1').textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
-                document.getElementById('die2').textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
-                count++;
-                if (count > 12) {
-                    clearInterval(interval);
-                    const total = Math.floor(Math.random() * 8) + 5;
-                    document.getElementById('roll-result').innerHTML = `🎲 <strong>${total}</strong>`;
-                    logEl.innerHTML += `${current.emoji} ${current.name} rolled <strong>${total}</strong>!<br>`;
-                    moveToken(current, total);
-                }
-            }, 55);
-        }
+ function rollDice() {
+ const current = allPlayers[currentPlayerIndex];
+ if (!current.isHuman || isMoving) return;
+ rollBtn.disabled = true;
+ let count = 0;
+ const interval = setInterval(() => {
+ document.getElementById('die1').textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
+ document.getElementById('die2').textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
+ count++;
+ if (count > 12) {
+ clearInterval(interval);
+ const total = Math.floor(Math.random() * 8) + 5;
+ document.getElementById('roll-result').innerHTML = `🎲 <strong>${total}</strong>`;
+ logEl.innerHTML += `${current.emoji} ${current.name} rolled <strong>${total}</strong>!<br>`;
+ moveToken(current, total);
+ }
+ }, 55);
+ }
 
-        function init() {
-            createBoard();
-            renderCharacterSelection();
-            rollBtn.addEventListener('click', rollDice);
-            document.addEventListener('keydown', e => { if (e.key === " ") rollDice(); });
+ function init() {
+ createBoard();
+ renderCharacterSelection();
+ rollBtn.addEventListener('click', rollDice);
+ document.addEventListener('keydown', e => { if (e.key === " ") rollDice(); });
 
-            // Bonus fix: mode buttons were not wired up
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    gameMode = parseInt(btn.dataset.mode);
-                    selectedCharacters = [];
-                    renderCharacterSelection();
-                });
-            });
+ document.querySelectorAll('.mode-btn').forEach(btn => {
+ btn.addEventListener('click', () => {
+ document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+ btn.classList.add('active');
+ gameMode = parseInt(btn.dataset.mode);
+ selectedCharacters = [];
+ renderCharacterSelection();
+ });
+ });
 
-            logEl.innerHTML = "✅ Fixed: +$500 on/passing CEO HQ • Rent paid by AI &amp; players • Stock cards affect everyone";
-        }
-        window.onload = init;
-    </script>
+ logEl.innerHTML = "🦉 SamOwl CEO Battle • +$500 on CEO HQ • Rent to owners • Stock cards active";
+ }
+ window.onload = init;
+ </script>
 </body>
 </html>
