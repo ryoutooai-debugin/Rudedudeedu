@@ -6,14 +6,11 @@
     <title>CEO Battle: Last Stand</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-
         :root {
             --gold: #ffd700;
             --accent: #00ff9d;
         }
-
         * { margin:0; padding:0; box-sizing:border-box; }
-
         body {
             background: #0a0a0a;
             color: white;
@@ -24,7 +21,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .game-container {
             display: flex;
             gap: 12px;
@@ -32,7 +28,6 @@
             height: 100vh;
             padding: 10px;
         }
-
         .board-wrapper {
             flex: 1;
             max-width: 820px;
@@ -43,7 +38,6 @@
             position: relative;
             padding: 25px;
         }
-
         #board {
             width: 100%;
             height: 100%;
@@ -53,7 +47,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .center-circle {
             position: absolute;
             top: 50%; left: 50%;
@@ -70,13 +63,11 @@
             z-index: 20;
             box-shadow: 0 0 50px rgba(255,215,0,0.6);
         }
-
         .center-circle h1 {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 26px;
             color: #ffd700;
         }
-
         .space {
             position: absolute;
             background: #222;
@@ -92,9 +83,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.8);
             padding: 4px;
         }
-
         .space.owned { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
-
         .token {
             position: absolute;
             width: 38px;
@@ -106,21 +95,18 @@
             z-index: 30;
             transition: all 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
         .side-panel {
             width: 235px;
             display: flex;
             flex-direction: column;
             gap: 9px;
         }
-
         .panel {
             background: #111;
             border: 2px solid #333;
             border-radius: 14px;
             padding: 10px;
         }
-
         .mode-btn {
             padding: 6px 10px;
             margin: 2px;
@@ -130,18 +116,15 @@
             cursor: pointer;
             font-size: 12px;
         }
-
         .mode-btn.active {
             background: var(--accent);
             color: #000;
         }
-
         .characters-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 6px;
         }
-
         .character-card {
             background: #1f1f1f;
             border: 3px solid #444;
@@ -150,18 +133,14 @@
             text-align: center;
             cursor: pointer;
         }
-
         .character-card.selected {
             border-color: var(--accent);
         }
-
         .character-card div:first-child { font-size: 28px; }
-
         .player-list {
             max-height: 125px;
             overflow-y: auto;
         }
-
         .player-item {
             display: flex;
             align-items: center;
@@ -172,14 +151,12 @@
             margin-bottom: 5px;
             font-size: 12.5px;
         }
-
         .dice-container {
             display: flex;
             justify-content: center;
             gap: 16px;
             margin: 10px 0;
         }
-
         .die {
             width: 52px;
             height: 52px;
@@ -190,7 +167,6 @@
             justify-content: center;
             font-size: 32px;
         }
-
         .roll-btn {
             background: linear-gradient(90deg, #ffd700, #ffea80);
             color: #111;
@@ -203,12 +179,10 @@
             cursor: pointer;
             width: 100%;
         }
-
         .roll-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
         .log {
             background: #0a0a0a;
             border-radius: 10px;
@@ -218,7 +192,6 @@
             font-size: 12px;
             color: #00ff9d;
         }
-
         .turn-indicator {
             text-align: center;
             font-size: 14.5px;
@@ -234,7 +207,6 @@
         <div class="board-wrapper">
             <div id="board"></div>
         </div>
-
         <div class="side-panel">
             <div class="panel">
                 <div style="text-align:center;">
@@ -245,24 +217,19 @@
                     <button class="mode-btn" data-mode="4">4P</button>
                 </div>
             </div>
-
             <div class="panel">
                 <h3 style="margin-bottom:6px;font-size:14px;">CHOOSE CEOS</h3>
                 <div class="characters-grid" id="characters-grid"></div>
             </div>
-
             <div class="panel">
                 <h3 style="margin-bottom:6px;font-size:14px;">PLAYERS</h3>
                 <div class="player-list" id="player-list"></div>
             </div>
-
             <div class="turn-indicator" id="turn-indicator">Select mode & CEOs</div>
-
             <div class="panel action-panel" id="action-panel" style="display:none;">
                 <h3 id="landed-title">LANDED ON...</h3>
                 <div id="action-content"></div>
             </div>
-
             <div class="panel">
                 <h2 style="margin-bottom:6px;font-size:15px;">ROLL TO MOVE</h2>
                 <div class="dice-container">
@@ -271,64 +238,60 @@
                 </div>
                 <button id="roll-btn" class="roll-btn" disabled>ROLL DICE</button>
                 <div id="roll-result" style="text-align:center; margin:8px 0; font-size:19px; font-weight:700;"></div>
-                <div class="log" id="log">+$500 on CEO HQ • Rent to owners • AI affected by Stock cards</div>
+                <div class="log" id="log">+$500 CEO HQ • Rent to owners • Stock cards active</div>
             </div>
         </div>
     </div>
-
     <script>
         let spaces = [
-            { id: 0,  name: "CEO HQ",              type: "go",       color: "#22c55e", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 1,  name: "Corner Coffee Shop",  type: "property", color: "#854d0e", price: 8000,  rent: 800,  owner: null, buildings: 0 },
-            { id: 2,  name: "Local Bakery",        type: "property", color: "#854d0e", price: 9500,  rent: 950,  owner: null, buildings: 0 },
-            { id: 3,  name: "STOCK WIN",           type: "chance",   color: "#6b46c1", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 4,  name: "Neighborhood Gym",    type: "property", color: "#0ea5e9", price: 11000, rent: 1100, owner: null, buildings: 0 },
-            { id: 5,  name: "Book Nook",           type: "property", color: "#0ea5e9", price: 12500, rent: 1250, owner: null, buildings: 0 },
-            { id: 6,  name: "Pet Supply Store",    type: "property", color: "#0ea5e9", price: 14000, rent: 1400, owner: null, buildings: 0 },
-            { id: 7,  name: "STOCK LOSS",          type: "chest",    color: "#c2410f", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 8,  name: "Fashion Boutique",    type: "property", color: "#e11d48", price: 16500, rent: 1650, owner: null, buildings: 0 },
-            { id: 9,  name: "Luxury Watches",      type: "property", color: "#e11d48", price: 19500, rent: 1950, owner: null, buildings: 0 },
-            { id: 10, name: "Art Gallery",         type: "property", color: "#e11d48", price: 22000, rent: 2200, owner: null, buildings: 0 },
-            { id: 11, name: "Income Tax",          type: "tax",      color: "#b91c1c", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 12, name: "Just Visiting",       type: "jail",     color: "#444",    price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 13, name: "Car Dealership",      type: "property", color: "#f59e0b", price: 28000, rent: 2800, owner: null, buildings: 0 },
-            { id: 14, name: "Tech Warehouse",      type: "property", color: "#f59e0b", price: 31000, rent: 3100, owner: null, buildings: 0 },
-            { id: 15, name: "Drone Delivery",      type: "property", color: "#f59e0b", price: 34000, rent: 3400, owner: null, buildings: 0 },
-            { id: 16, name: "STOCK WIN",           type: "chance",   color: "#6b46c1", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 17, name: "Global Logistics",    type: "property", color: "#64748b", price: 38000, rent: 3800, owner: null, buildings: 0 },
-            { id: 18, name: "Free Parking",        type: "parking",  color: "#64748b", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 19, name: "Venture Capital",     type: "property", color: "#7c3aed", price: 45000, rent: 4500, owner: null, buildings: 0 },
-            { id: 20, name: "Stock Exchange",      type: "property", color: "#7c3aed", price: 52000, rent: 5200, owner: null, buildings: 0 },
-            { id: 21, name: "GO TO SCHOOL",        type: "gotojail", color: "#b91c1c", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 22, name: "Biotech Lab",         type: "property", color: "#10b981", price: 58000, rent: 5800, owner: null, buildings: 0 },
-            { id: 23, name: "Crypto Exchange",     type: "property", color: "#10b981", price: 63000, rent: 6300, owner: null, buildings: 0 },
-            { id: 24, name: "STOCK WIN",           type: "chance",   color: "#6b46c1", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 25, name: "Solar Energy Co.",    type: "property", color: "#10b981", price: 41000, rent: 4100, owner: null, buildings: 0 },
-            { id: 26, name: "Online Marketplace",  type: "property", color: "#7c3aed", price: 47000, rent: 4700, owner: null, buildings: 0 },
+            { id: 0, name: "CEO HQ", type: "go", color: "#22c55e", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 1, name: "Corner Coffee Shop", type: "property", color: "#854d0e", price: 8000, rent: 800, owner: null, buildings: 0 },
+            { id: 2, name: "Local Bakery", type: "property", color: "#854d0e", price: 9500, rent: 950, owner: null, buildings: 0 },
+            { id: 3, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 4, name: "Neighborhood Gym", type: "property", color: "#0ea5e9", price: 11000, rent: 1100, owner: null, buildings: 0 },
+            { id: 5, name: "Book Nook", type: "property", color: "#0ea5e9", price: 12500, rent: 1250, owner: null, buildings: 0 },
+            { id: 6, name: "Pet Supply Store", type: "property", color: "#0ea5e9", price: 14000, rent: 1400, owner: null, buildings: 0 },
+            { id: 7, name: "STOCK LOSS", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 8, name: "Fashion Boutique", type: "property", color: "#e11d48", price: 16500, rent: 1650, owner: null, buildings: 0 },
+            { id: 9, name: "Luxury Watches", type: "property", color: "#e11d48", price: 19500, rent: 1950, owner: null, buildings: 0 },
+            { id: 10, name: "Art Gallery", type: "property", color: "#e11d48", price: 22000, rent: 2200, owner: null, buildings: 0 },
+            { id: 11, name: "Income Tax", type: "tax", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 12, name: "Just Visiting", type: "jail", color: "#444", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 13, name: "Car Dealership", type: "property", color: "#f59e0b", price: 28000, rent: 2800, owner: null, buildings: 0 },
+            { id: 14, name: "Tech Warehouse", type: "property", color: "#f59e0b", price: 31000, rent: 3100, owner: null, buildings: 0 },
+            { id: 15, name: "Drone Delivery", type: "property", color: "#f59e0b", price: 34000, rent: 3400, owner: null, buildings: 0 },
+            { id: 16, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 17, name: "Global Logistics", type: "property", color: "#64748b", price: 38000, rent: 3800, owner: null, buildings: 0 },
+            { id: 18, name: "Free Parking", type: "parking", color: "#64748b", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 19, name: "Venture Capital", type: "property", color: "#7c3aed", price: 45000, rent: 4500, owner: null, buildings: 0 },
+            { id: 20, name: "Stock Exchange", type: "property", color: "#7c3aed", price: 52000, rent: 5200, owner: null, buildings: 0 },
+            { id: 21, name: "GO TO SCHOOL", type: "gotojail", color: "#b91c1c", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 22, name: "Biotech Lab", type: "property", color: "#10b981", price: 58000, rent: 5800, owner: null, buildings: 0 },
+            { id: 23, name: "Crypto Exchange", type: "property", color: "#10b981", price: 63000, rent: 6300, owner: null, buildings: 0 },
+            { id: 24, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 25, name: "Solar Energy Co.", type: "property", color: "#10b981", price: 41000, rent: 4100, owner: null, buildings: 0 },
+            { id: 26, name: "Online Marketplace", type: "property", color: "#7c3aed", price: 47000, rent: 4700, owner: null, buildings: 0 },
             { id: 27, name: "Private Jet Charter", type: "property", color: "#e11d48", price: 71000, rent: 7100, owner: null, buildings: 0 },
-            { id: 28, name: "STOCK LOSS",          type: "chest",    color: "#c2410f", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 29, name: "Digital Media Firm",  type: "property", color: "#e11d48", price: 39000, rent: 3900, owner: null, buildings: 0 },
-            { id: 30, name: "Pharma Research",     type: "property", color: "#10b981", price: 54000, rent: 5400, owner: null, buildings: 0 },
-            { id: 31, name: "Luxury Resort",       type: "property", color: "#e11d48", price: 68000, rent: 6800, owner: null, buildings: 0 },
-            { id: 32, name: "STOCK WIN",           type: "chance",   color: "#6b46c1", price: 0,    rent: 0,    owner: null, buildings: 0 },
-            { id: 33, name: "Media Studio",        type: "property", color: "#e11d48", price: 42000, rent: 4200, owner: null, buildings: 0 },
-            { id: 34, name: "E-commerce Hub",      type: "property", color: "#7c3aed", price: 49000, rent: 4900, owner: null, buildings: 0 },
-            { id: 35, name: "Private Bank",        type: "property", color: "#e11d48", price: 65000, rent: 6500, owner: null, buildings: 0 }
+            { id: 28, name: "STOCK LOSS", type: "chest", color: "#c2410f", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 29, name: "Digital Media Firm", type: "property", color: "#e11d48", price: 39000, rent: 3900, owner: null, buildings: 0 },
+            { id: 30, name: "Pharma Research", type: "property", color: "#10b981", price: 54000, rent: 5400, owner: null, buildings: 0 },
+            { id: 31, name: "Luxury Resort", type: "property", color: "#e11d48", price: 68000, rent: 6800, owner: null, buildings: 0 },
+            { id: 32, name: "STOCK WIN", type: "chance", color: "#6b46c1", price: 0, rent: 0, owner: null, buildings: 0 },
+            { id: 33, name: "Media Studio", type: "property", color: "#e11d48", price: 42000, rent: 4200, owner: null, buildings: 0 },
+            { id: 34, name: "E-commerce Hub", type: "property", color: "#7c3aed", price: 49000, rent: 4900, owner: null, buildings: 0 },
+            { id: 35, name: "Private Bank", type: "property", color: "#e11d48", price: 65000, rent: 6500, owner: null, buildings: 0 }
         ];
-
         const characterTemplates = [
             { id: "owl", name: "Owl", emoji: "🦉", color: "#a5b4fc", aggression: 0.5, buildTendency: 0.75 },
             { id: "wolf", name: "Wolf", emoji: "🐺", color: "#f87171", aggression: 0.85, buildTendency: 0.6 },
             { id: "bear", name: "Bear", emoji: "🐻", color: "#78716c", aggression: 0.3, buildTendency: 0.85 },
             { id: "bull", name: "Bull", emoji: "🐂", color: "#fbbf24", aggression: 0.7, buildTendency: 0.65 }
         ];
-
         let gameMode = 1;
         let allPlayers = [];
         let currentPlayerIndex = 0;
         let isMoving = false;
         let selectedCharacters = [];
-
         const board = document.getElementById('board');
         const logEl = document.getElementById('log');
         const rollBtn = document.getElementById('roll-btn');
@@ -341,13 +304,11 @@
 
         function createBoard() {
             board.innerHTML = `<div class="center-circle"><h1>CEO BATTLE</h1><p>36 SPACES</p></div>`;
-
             const positions = [];
             for (let i = 0; i < 9; i++) positions.push({x: 70 + i*68, y: 48});
             for (let i = 0; i < 9; i++) positions.push({x: 670, y: 95 + i*52});
             for (let i = 0; i < 9; i++) positions.push({x: 600 - i*68, y: 515});
             for (let i = 0; i < 9; i++) positions.push({x: 48, y: 480 - i*52});
-
             spaces.forEach((space, i) => {
                 const pos = positions[i];
                 const el = document.createElement('div');
@@ -367,12 +328,10 @@
             const spaceEls = board.querySelectorAll('.space');
             const target = Array.from(spaceEls).find(s => parseInt(s.dataset.id) === player.position);
             if (!target) return;
-
             const rect = target.getBoundingClientRect();
             const boardRect = board.getBoundingClientRect();
             const tx = rect.left - boardRect.left + rect.width/2 - 19;
             const ty = rect.top - boardRect.top + rect.height/2 - 19;
-
             let token = document.getElementById(`token-${player.id}`);
             if (!token) {
                 token = document.createElement('div');
@@ -412,14 +371,12 @@
             selectedCharacters.forEach((char,i) => {
                 allPlayers.push({ id:`p${i}`, name:char.name, emoji:char.emoji, color:char.color, cash:30000, properties:[], isHuman:true, position:0, aggression:char.aggression, buildTendency:char.buildTendency });
             });
-
             const remaining = 4 - gameMode;
             const aiPool = characterTemplates.filter(c => !selectedCharacters.find(sc => sc.id === c.id));
             for (let i = 0; i < remaining; i++) {
                 const aiChar = aiPool[i % aiPool.length];
                 allPlayers.push({ id:`ai${i}`, name:aiChar.name, emoji:aiChar.emoji, color:aiChar.color, cash:30000, properties:[], isHuman:false, position:0, aggression:aiChar.aggression, buildTendency:aiChar.buildTendency });
             }
-
             createBoard();
             allPlayers.forEach(p => positionToken(p));
             renderPlayerList();
@@ -442,22 +399,20 @@
             turnIndicator.innerHTML = `<span style="color:${p.color}">${p.emoji}</span> ${p.name}'s Turn`;
         }
 
+        // FIXED: CEO HQ now triggers on BOTH landing AND passing (checked every step of the move)
         async function moveToken(player, steps) {
             if (isMoving) return;
             isMoving = true;
-
             for (let i = 0; i < steps; i++) {
                 player.position = (player.position + 1) % spaces.length;
                 positionToken(player);
+                // Collect $500 when landing on or passing CEO HQ
+                if (player.position === 0) {
+                    player.cash += 500;
+                    logEl.innerHTML += `<span style="color:#22c55e">${player.emoji} ${player.name} → +$500 CEO HQ</span><br>`;
+                }
                 await new Promise(r => setTimeout(r, 160));
             }
-
-            // Fixed: CEO HQ bonus
-            if (player.position === 0) {
-                player.cash += 500;
-                logEl.innerHTML += `Passed CEO HQ → +$500<br>`;
-            }
-
             handleLanding(player);
             isMoving = false;
         }
@@ -481,12 +436,12 @@
                             <button onclick="endTurn()">END TURN</button>
                         `;
                     } else {
-                        // Fixed: Rent payment
+                        // FIXED: Human pays membership fee (rent)
                         const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
                         player.cash -= rentDue;
                         const owner = allPlayers.find(p => p.id === space.owner);
                         if (owner) owner.cash += rentDue;
-                        logEl.innerHTML += `Paid $${rentDue} rent to ${owner ? owner.name : 'owner'}<br>`;
+                        logEl.innerHTML += `<span style="color:#f87171">${player.emoji} Paid $${rentDue} membership fee to ${owner ? owner.name : 'owner'}</span><br>`;
                         actionContent.innerHTML = `<button onclick="endTurn()">CONTINUE</button>`;
                     }
                 } else if (space.type === "chance") {
@@ -499,27 +454,49 @@
                     actionContent.innerHTML = `<button onclick="endTurn()">END TURN</button>`;
                 }
             } else {
-                // AI turn
+                // AI turn - FIXED: now fully affected by rent, stock win/loss
                 actionContent.innerHTML = `<p style="color:#aaa">AI deciding...</p>`;
                 setTimeout(() => {
-                    if (space.type === "chance") drawStockWin(player);
-                    else if (space.type === "chest") drawStockLoss(player);
-                    else if (space.type === "property" && !space.owner) aiDecision(player, player.position);
+                    const space = spaces[player.position];
+                    if (space.type === "property") {
+                        if (!space.owner) {
+                            aiDecision(player, player.position);
+                        } else if (space.owner !== player.id) {
+                            // FIXED: AI pays membership fee (rent)
+                            const rentDue = Math.floor(space.rent * (1 + space.buildings * 0.7));
+                            player.cash -= rentDue;
+                            const owner = allPlayers.find(p => p.id === space.owner);
+                            if (owner) owner.cash += rentDue;
+                            logEl.innerHTML += `<span style="color:#f87171">${player.emoji} ${player.name} paid $${rentDue} membership fee to ${owner ? owner.name : 'owner'}</span><br>`;
+                        } else if (Math.random() < player.buildTendency) {
+                            // Bonus: smarter AI occasionally builds on own property
+                            const cost = 9000 + space.buildings * 6000;
+                            if (player.cash >= cost) {
+                                player.cash -= cost;
+                                space.buildings++;
+                                logEl.innerHTML += `${player.emoji} ${player.name} upgraded ${space.name}!<br>`;
+                            }
+                        }
+                    } else if (space.type === "chance") {
+                        drawStockWin(player);
+                    } else if (space.type === "chest") {
+                        drawStockLoss(player);
+                    }
                     endTurn();
-                }, 800);
+                }, 950);
             }
         }
 
         function drawStockWin(player) {
             const amount = Math.floor(Math.random() * 901) + 100;
             player.cash += amount;
-            logEl.innerHTML += `${player.emoji} ${player.name} Stock Win! +$${amount}<br>`;
+            logEl.innerHTML += `<span style="color:#22c55e">${player.emoji} ${player.name} STOCK WIN! +$${amount}</span><br>`;
         }
 
         function drawStockLoss(player) {
-            const amount = Math.floor(Math.random() * 500) + 1;
+            const amount = Math.floor(Math.random() * 650) + 150;
             player.cash -= amount;
-            logEl.innerHTML += `${player.emoji} ${player.name} Stock Loss! -$${amount}<br>`;
+            logEl.innerHTML += `<span style="color:#f87171">${player.emoji} ${player.name} STOCK LOSS! -$${amount}</span><br>`;
         }
 
         function aiDecision(ai, pos) {
@@ -564,10 +541,8 @@
             currentPlayerIndex = (currentPlayerIndex + 1) % allPlayers.length;
             updateTurnIndicator();
             renderPlayerList();
-
             const next = allPlayers[currentPlayerIndex];
             rollBtn.disabled = !next.isHuman;
-
             if (!next.isHuman) {
                 setTimeout(() => {
                     const roll = Math.floor(Math.random() * 8) + 5;
@@ -580,7 +555,6 @@
         function rollDice() {
             const current = allPlayers[currentPlayerIndex];
             if (!current.isHuman || isMoving) return;
-
             rollBtn.disabled = true;
             let count = 0;
             const interval = setInterval(() => {
@@ -602,9 +576,20 @@
             renderCharacterSelection();
             rollBtn.addEventListener('click', rollDice);
             document.addEventListener('keydown', e => { if (e.key === " ") rollDice(); });
-            logEl.innerHTML = "Fixed: +$500 on HQ • Rent payments • AI affected by Stock cards";
-        }
 
+            // Bonus fix: mode buttons were not wired up
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameMode = parseInt(btn.dataset.mode);
+                    selectedCharacters = [];
+                    renderCharacterSelection();
+                });
+            });
+
+            logEl.innerHTML = "✅ Fixed: +$500 on/passing CEO HQ • Rent paid by AI &amp; players • Stock cards affect everyone";
+        }
         window.onload = init;
     </script>
 </body>
