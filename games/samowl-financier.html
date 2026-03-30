@@ -190,7 +190,7 @@
         </div>
     </div>
 
-    <div class="debt-warning" id="debtWarning">⚠️ DEBT ALERT — 10% daily interest is crushing your empire</div>
+    <div class="debt-warning" id="debtWarning">⚠️ DEBT ALERT — 3% daily interest is crushing your empire</div>
 
     <div class="container">
         <!-- LEFT: ACTIVE INCOME + MY ASSETS -->
@@ -240,7 +240,7 @@
                 <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
                     <button class="btn" onclick="transferToSavings()">Deposit to HYSA</button>
                     <button class="btn" onclick="withdrawFromSavings()">Withdraw from HYSA</button>
-                    <button class="btn" onclick="takeLoan()" style="background:#f59e0b;">💳 Take $1,000 Loan (10% daily)</button>
+                    <button class="btn" onclick="takeLoan()" style="background:#f59e0b;">💳 Take $1,000 Loan (3% daily)</button>
                     <button class="btn" onclick="payLoan()" style="background:#4ade80;">Pay Down Debt</button>
                 </div>
                 <div style="margin-top:12px;font-size:0.85rem;color:#64748b;">
@@ -402,7 +402,7 @@
             // Debt
             let debtCost = 0;
             if (gameState.debt > 0) {
-                debtCost = Math.floor(gameState.debt * 0.10);
+                debtCost = Math.floor(gameState.debt * 0.03);
                 gameState.debt += debtCost;
                 dailySummary += `💳 Debt interest: <span style="color:#ff6b6b">-$${debtCost}</span><br>`;
             }
