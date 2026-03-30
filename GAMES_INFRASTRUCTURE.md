@@ -1,190 +1,106 @@
 # Games Infrastructure Documentation
 
-**Last Updated:** March 28, 2026
+**Last Updated:** March 30, 2026
 
-## Current Architecture
+## Quick Deploy (DO NOT USE FTP)
 
+**Step 1:** Commit to correct repo/folder
+```bash
+# Commit to ryoutooai-debugin/Rudedudeedu under games/
+git add games/ceo-battle.html
+git commit -m "Add SamOwl CEO Battle game"
+git push public main  # or use GitHub API
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Development   │────▶│   GitHub Repo    │────▶│   samowl.net    │
-│  (This Container)│     │ Rudedudeedu     │     │   /games/       │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-        │                        │                         │
-        ▼                        ▼                         ▼
-  game_vault.env         Supabase DB              Manual FTP or
-                    (Leaderboard: kyxoizlon...)   deploy script
-```
+
+**Step 2:** Auto-publishes to samowl.net (5-10 min)
+
+---
 
 ## Repository
 
 **GitHub Repo:** `ryoutooai-debugin/Rudedudeedu`
 - **URL:** https://github.com/ryoutooai-debugin/Rudedudeedu
-- **Collaborators:** Rudedude + Samuel (AI assistant)
 - **Branch:** main
+- **Games Folder:** `games/`
 
-### Files in Repo
+### How Publishing Works
 
-| Path | Purpose |
-|------|---------|
-| `games/index.html` | Games hub page |
-| `games/samowl-portfolio-challenge.html` | Portfolio trading game |
-| `games/samowl-market-match.html` | Pattern matching game |
-| `games/samowl-color-match.html` | Color matching game |
-| `games/samowl-pattern-master.html` | Pattern mastery game |
-| `games/bull-vs-bear.html` | Tower defense game |
-| `games/samowl-trading-quest.html` | Trading quest game |
-| `games/deploy_to_samowl.sh` | Auto-deploy script to samowl.net |
-| `games/td-chunked/` | Chunked TD game |
+| Commit to... | Auto-publishes to... |
+|--------------|---------------------|
+| `games/ceo-battle.html` | https://samowl.net/games/ceo-battle.html |
+| `games/samowl-financier.html` | https://samowl.net/games/samowl-financier.html |
+| `games/samowl-portfolio-challenge.html` | https://samowl.net/games/samowl-portfolio-challenge.html |
 
-## Hosting
+**Delay:** ~5-10 minutes (GitHub Pages CDN caching)
 
-**Live URL:** https://samowl.net/games/
+---
 
-**Deployment Method:** Manual upload via cPanel FTP or auto-deploy script
+## Live Game URLs
 
-### Auto-Deploy Script
+| Game | GitHub | Live on samowl.net |
+|------|--------|-------------------|
+| CEO Battle | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/ceo-battle.html | https://samowl.net/games/ceo-battle.html |
+| Financier | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/samowl-financier.html | https://samowl.net/games/samowl-financier.html |
+| Portfolio Challenge | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/samowl-portfolio-challenge.html | https://samowl.net/games/samowl-portfolio-challenge.html |
+| Bulls vs Bears TD | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/bull-vs-bear.html | https://samowl.net/games/bull-vs-bear.html |
+| Trading Quest | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/samowl-trading-quest.html | https://samowl.net/games/samowl-trading-quest.html |
+| Market Match | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/samowl-market-match.html | https://samowl.net/games/samowl-market-match.html |
+| Color Match | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/samowl-color-match.html | https://samowl.net/games/samowl-color-match.html |
+| Pattern Master | https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/samowl-pattern-master.html | https://samowl.net/games/samowl-pattern-master.html |
 
-```bash
-# Edit credentials in deploy_to_samowl.sh
-bash games/deploy_to_samowl.sh
-```
-
-**Script Location:** `games/deploy_to_samowl.sh`
-
-## Database (Leaderboard)
-
-**Supabase Project:** `kyxoizlonqbahkothtaq`
-- **URL:** https://kyxoizlonqbahkothtaq.supabase.co
-- **Database:** PostgreSQL
-- **Table:** `portfolio_leaderboard`
-
-### Table Schema
-
-```sql
-CREATE TABLE portfolio_leaderboard (
-    id SERIAL PRIMARY KEY,
-    player_name TEXT UNIQUE NOT NULL,
-    portfolio_value DECIMAL(12,2) NOT NULL DEFAULT 10000,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-### RLS Policies
-- Anyone can read
-- Anyone can insert/update scores
+---
 
 ## Credentials Storage
 
 **Location:** `/root/.openclaw/workspace/game_vault.env`
 
 ```bash
-# Supabase
+# GitHub (for pushing to Rudedudeedu)
+GITHUB_TOKEN=ghp_YOUR_TOKEN_HERE
+
+# Supabase (for leaderboards)
 GAME_SUPABASE_URL=https://kyxoizlonqbahkothtaq.supabase.co
 GAME_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-GAME_SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# GitHub
-GITHUB_TOKEN=YOUR_TOKEN_HERE
-GITHUB_REPO=https://github.com/ryoutooai-debugin/Rudedudeedu.git
-
-# samowl.net Hosting
-SAMOWL_FTP_HOST=samowl.net
-SAMOWL_FTP_USER=your_username
-SAMOWL_FTP_PASS=your_password
-SAMOWL_GAMES_DIR=/games
 ```
-
-## Deployment Workflow
-
-### Option 1: Manual Push
-
-```bash
-# Clone repo (once)
-git clone https://github.com/ryoutooai-debugin/Rudedudeedu.git
-
-# Make changes
-cd Rudedudeedu
-git add games/samowl-portfolio-challenge.html
-git commit -m "Update portfolio game"
-git push origin main
-```
-
-### Option 2: Auto-Deploy to samowl.net
-
-```bash
-# Edit deploy_to_samowl.sh with your FTP credentials
-nano games/deploy_to_samowl.sh
-
-# Run after pushing to GitHub
-bash games/deploy_to_samowl.sh
-```
-
-## Games
-
-### Portfolio Challenge
-- **File:** `games/samowl-portfolio-challenge.html`
-- **Live:** https://samowl.net/games/samowl-portfolio-challenge.html
-- **Leaderboard:** Supabase (portfolio_leaderboard table)
-- **Features:** Paper trading, real prices during market hours, leaderboard
-
-### Market Match
-- **File:** `games/samowl-market-match.html`
-- **Live:** https://samowl.net/games/samowl-market-match.html
-- **Objective:** Match candlestick patterns
-
-### Color Match
-- **File:** `games/samowl-color-match.html`
-- **Live:** https://samowl.net/games/samowl-color-match.html
-
-### Pattern Master
-- **File:** `games/samowl-pattern-master.html`
-- **Live:** https://samowl.net/games/samowl-pattern-master.html
-
-### Bulls vs Bears TD
-- **File:** `games/bull-vs-bear.html`
-- **Live:** https://samowl.net/games/bull-vs-bear.html
-
-### Trading Quest
-- **File:** `games/samowl-trading-quest.html`
-- **Live:** https://samowl.net/games/samowl-trading-quest.html
-
-## Historical Notes
-
-- **Old Repo (deleted):** `ryoutooai-debugin/rudedudetrainings` - contained private Samuel work, deleted to avoid exposure
-- **Old Hosting (deprecated):** Netlify - used credits, removed
-- **Old Supabase (retired):** Previous project replaced
-
-## Troubleshooting
-
-### Game Not Loading
-1. Check browser console for errors
-2. Verify Supabase credentials in game_vault.env
-3. Check network requests to supabase.co
-
-### Leaderboard Not Updating
-1. Verify Supabase RLS policies allow writes
-2. Check browser network tab for 401/403 errors
-3. Ensure anon key is correct
-
-### FTP Deploy Fails
-1. Verify credentials in deploy_to_samowl.sh
-2. Check cPanel FTP details
-3. Test connection manually
-
-## Maintenance
-
-### Update Game Credentials
-1. Update game_vault.env
-2. Rebuild HTML with new credentials
-3. Push to GitHub
-4. Deploy to samowl.net
-
-### Add New Game
-1. Add HTML to `games/` directory
-2. Update index.html with link
-3. Push to GitHub
-4. Deploy to samowl.net
 
 ---
 
-*Last updated by Samuel (AI assistant) - March 28, 2026*
+## Deployment via GitHub API (Recommended)
+
+Use this method to bypass branch conflicts:
+
+```bash
+# Get current file SHA
+SHA=$(curl -s "https://api.github.com/repos/ryoutooai-debugin/Rudedudeedu/contents/games/YOUR_GAME.html" \
+  -H "Authorization: token $GITHUB_TOKEN" | python3 -c "import sys,json; print(json.load(sys.stdin)['sha'])")
+
+# Upload new version
+curl -s -X PUT "https://api.github.com/repos/ryoutooai-debugin/Rudedudeedu/contents/games/YOUR_GAME.html" \
+  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"message\":\"Update YOUR_GAME.html\",\"content\":\"$(base64 -w0 YOUR_GAME.html)\",\"sha\":\"$SHA\"}"
+```
+
+---
+
+## Games Hub
+
+**Main hub:** https://samowl.net/games/
+
+**Index file:** https://github.com/ryoutooai-debugin/Rudedudeedu/blob/main/games/index.html
+
+---
+
+## Old Documentation (Deprecated)
+
+### FTP Deploy (DO NOT USE)
+- Previous method: Manual upload via cPanel FTP
+- **Now deprecated** - commits to `games/` folder auto-publish
+
+### Netlify (Deprecated)
+- Previously used Netlify for hosting
+- Removed due to credits expiring
+
+---
+
+*Last updated: March 30, 2026*
