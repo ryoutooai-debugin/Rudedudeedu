@@ -822,18 +822,22 @@
             for (const [symbol, holding] of Object.entries(gameState.holdings)) {
                 const stock = stocks.find(s => s.symbol === symbol);
                 if (stock) {
-                    holdingsValue += holding.shares * stock.basePrice;
+                    // Use the latest price for current value calculation
+                    holdingsValue += holding.shares * stock.basePrice; 
                 }
             }
             
             const totalValue = gameState.cash + holdingsValue;
             const totalReturn = totalValue - gameState.startValue;
-            const returnPct = (totalReturn / gameState.startValue) * 100;
+            // Calculate percentage change based on startValue, not lastClose
+            const returnPct = (totalReturn / gameState.startValue) * 100; 
             
             document.getElementById('headerPortfolio').textContent = `$${totalValue.toLocaleString()}`;
             document.getElementById('headerCash').textContent = `$${gameState.cash.toLocaleString()}`;
-            document.getElementById('headerChange').textContent = `${totalReturn >= 0 ? '+' : ''}$${totalReturn.toFixed(2)}`;
-            document.getElementById('headerChange').className = `header-stat-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
+            // Header change should reflect daily change
+            const headerDailyChange = stocks.reduce((acc,s) => acc + (s.dailyChange * gameState.holdings[s.symbol]?.shares || 0), 0);
+            document.getElementById('headerChange').textContent = `${headerDailyChange >= 0 ? '+' : ''}$${headerDailyChange.toFixed(2)}`;
+            document.getElementById('headerChange').className = `header-stat-value ${headerDailyChange >= 0 ? 'positive' : 'negative'}`;
             
             document.getElementById('dashPortfolio').textContent = `$${totalValue.toLocaleString()}`;
             document.getElementById('dashCash').textContent = `$${gameState.cash.toLocaleString()}`;
@@ -867,7 +871,8 @@
                     <tbody>
                         ${holdings.map(([symbol, h]) => {
                             const stock = stocks.find(s => s.symbol === symbol);
-                            const currentPrice = stock ? stock.basePrice : h.avgPrice;
+                            // Use latest price for current, and calculate PnL based on Avg Price and current price
+                            const currentPrice = stock ? stock.basePrice : h.avgPrice; 
                             const value = h.shares * currentPrice;
                             const cost = h.shares * h.avgPrice;
                             const pnl = value - cost;
