@@ -518,16 +518,14 @@
     </div>
 
     <script>
-        // Supabase Setup
+        // Supabase Setup - defer client creation until needed
         const SUPABASE_URL = 'https://kyxoizlonqbahkothtaq.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5eG9pemxvbnFiYWhrb3RodGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2Mzc3NTEsImV4cCI6MjA5MDIxMzc1MX0.zCv5L5D3NZq2DNbT4I7FWw-raMGVnbp5LyI1M4XgjeY';
         
-        // Create supabase client - check both window.supabase and window.Supabase
-        var supabase = null;
-        if (typeof window.Supabase !== 'undefined') {
-            supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } else if (typeof window.supabase !== 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        function getSupabase() {
+            if (window.supabase) return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            if (window.Supabase) return window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            return null;
         }
 
         // Stock symbols for the game (matches price.json keys)
@@ -600,7 +598,7 @@
             // Save to Supabase leaderboard
             const totalValue = gameState.cash + Object.values(gameState.holdings).reduce((sum, h) => sum + (h.shares * h.avgPrice), 0);
             try {
-                const { error } = await supabase
+                const { error } = await getSupabase()
                     .from('portfolio_leaderboard')
                     .upsert({ 
                         player_name: gameState.playerName, 
@@ -902,7 +900,7 @@
         async function updateLeaderboard() {
             const list = document.getElementById('leaderboardList');
             try {
-                const { data, error } = await supabase
+                const { data, error } = await getSupabase()
                     .from('portfolio_leaderboard')
                     .select('*')
                     .order('score', { ascending: false })
