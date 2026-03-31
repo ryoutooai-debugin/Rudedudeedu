@@ -519,8 +519,8 @@
 
     <script>
         // Supabase Setup - reuse existing CDN client or create new
-        const SUPABASE_URL = 'https://rtbqaqkobwwjnbzwvjab.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0YnFhcWtvYnd3am5iend2amFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDE2ODAsImV4cCI6MjA4ODgxNzY4MH0.EUnSeOMf3U6Uentgo1gcq-PfTgTI35SN92Vr9mdNO0Y';
+        const SUPABASE_URL = 'https://kyxoizlonqbahkothtaq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5eG9pemxvbnFiYWhrb3RodGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2Mzc3NTEsImV4cCI6MjA5MDIxMzc1MX0.zCv5L5D3NZq2DNbT4I7FWw-raMGVnbp5LyI1M4XgjeY';
         
         // Use existing supabase from CDN or create new client
         var supabase = window.supabase ? window.supabase : (window.Supabase ? window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
@@ -587,7 +587,7 @@
             const totalValue = gameState.cash + Object.values(gameState.holdings).reduce((sum, h) => sum + (h.shares * h.avgPrice), 0);
             try {
                 const { error } = await supabase
-                    .from('leaderboard')
+                    .from('portfolio_leaderboard')
                     .upsert({ 
                         player_name: gameState.playerName, 
                         score: totalValue,
@@ -889,7 +889,7 @@
             const list = document.getElementById('leaderboardList');
             try {
                 const { data, error } = await supabase
-                    .from('leaderboard')
+                    .from('portfolio_leaderboard')
                     .select('*')
                     .order('score', { ascending: false })
                     .limit(10);
