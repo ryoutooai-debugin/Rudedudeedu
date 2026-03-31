@@ -539,17 +539,29 @@
 
         let currentTrade = { symbol: '', action: '', price: 0 };
 
-        // Stock data with realistic prices (base + daily movement)
-        const stocks = [
-            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 175.50, volatility: 0.02 },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 142.30, volatility: 0.025 },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 380.25, volatility: 0.018 },
-            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 178.90, volatility: 0.028 },
-            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 205.60, volatility: 0.045 },
-            { symbol: 'META', name: 'Meta Platforms', basePrice: 505.75, volatility: 0.032 },
-            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 890.15, volatility: 0.038 },
-            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 625.40, volatility: 0.035 }
-        ];
+        // Stock symbols for the game (matches price.json keys)
+        const stockSymbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX'];
+        
+        // Stock display names
+        const stockNames = {
+            'AAPL': 'Apple Inc.',
+            'GOOGL': 'Alphabet Inc.',
+            'MSFT': 'Microsoft Corp.',
+            'AMZN': 'Amazon.com',
+            'TSLA': 'Tesla Inc.',
+            'META': 'Meta Platforms',
+            'NVDA': 'NVIDIA Corp.',
+            'NFLX': 'Netflix Inc.'
+        };
+        
+        // Stock data with prices loaded from price.json
+        const stocks = stockSymbols.map(symbol => ({
+            symbol: symbol,
+            name: stockNames[symbol],
+            basePrice: 100, // Will be overwritten by price.json
+            lastClose: null,
+            dailyChange: 0
+        }));
 
         // Load saved game
         function loadGame() {
@@ -610,52 +622,47 @@
             setInterval(updatePrices, 30000);
         }
 
-        // Fetch real prices from Yahoo Finance
+        // Fetch prices from price.json (centralized price source)
         async function fetchRealPrices() {
             try {
-                const symbols = stocks.map(s => s.symbol).join(',');
-                const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbols}?interval=1d&range=1d`);
-                const data = await response.json();
+                // Fetch from price.json in the games folder
+                const response = await fetch('price.json');
+                const prices = await response.json();
                 
-                if (data.chart && data.chart.result) {
-                    data.chart.result.forEach((result, index) => {
-                        if (result.meta && result.meta.regularMarketPrice) {
-                            stocks[index].basePrice = result.meta.regularMarketPrice;
-                            stocks[index].lastClose = stocks[index].lastClose || result.meta.previousClose;
-                            stocks[index].dailyChange = result.meta.regularMarketPrice - result.meta.previousClose;
-                        }
-                    });
-                }
+                // Update stocks with prices from price.json
+                stockSymbols.forEach(symbol => {
+                    const stock = stocks.find(s => s.symbol === symbol);
+                    if (stock && prices[symbol]) {
+                        const prevPrice = stock.basePrice;
+                        stock.basePrice = prices[symbol];
+                        stock.dailyChange = prices[symbol] - (stock.lastClose || prices[symbol]);
+                        stock.lastClose = stock.lastClose || prices[symbol];
+                    }
+                });
             } catch (e) {
-                console.log('Using simulated prices (Yahoo Finance unavailable)');
-                // Fall back to simulated movement
+                console.log('Error loading price.json, using fallback');
+                // Fall back to simulated movement if price.json fails
                 simulatePriceMovement();
             }
             renderMarket();
             updateDashboard();
         }
 
-        // Simulate realistic price movements when API unavailable
+        // Fallback: simulate realistic price movements when price.json unavailable
         function simulatePriceMovement() {
             stocks.forEach(s => {
-                // Store previous price as lastClose for change calculation
                 if (!s.lastClose) s.lastClose = s.basePrice;
-                
-                // Random walk with mean reversion
-                const marketBias = (Math.random() - 0.48) * 0.005; // Slight upward bias
-                const stockMove = (Math.random() - 0.5) * s.volatility;
+                const marketBias = (Math.random() - 0.48) * 0.005;
+                const stockMove = (Math.random() - 0.5) * 0.02;
                 const totalMove = marketBias + stockMove;
-                
                 s.basePrice = s.basePrice * (1 + totalMove);
                 s.dailyChange = s.basePrice - s.lastClose;
             });
         }
 
-        // Update stock prices (fallback to simulation if API fails)
+        // Update stock prices
         function updatePrices() {
-            simulatePriceMovement();
-            renderMarket();
-            updateDashboard();
+            fetchRealPrices();
         }
 
         // Switch tabs
