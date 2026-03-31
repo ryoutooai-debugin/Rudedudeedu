@@ -518,13 +518,12 @@
     </div>
 
     <script>
-        // Supabase Setup
+        // Supabase Setup - reuse existing CDN client or create new
         const SUPABASE_URL = 'https://rtbqaqkobwwjnbzwvjab.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0YnFhcWtvYnd3am5iend2amFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDE2ODAsImV4cCI6MjA4ODgxNzY4MH0.EUnSeOMf3U6Uentgo1gcq-PfTgTI35SN92Vr9mdNO0Y';
         
-        // Handle case where supabase is already declared by CDN library
-        const supabaseLib = window.supabase || window.Supabase;
-        const supabase = supabaseLib ? supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        // Use existing supabase from CDN or create new client
+        var supabase = window.supabase ? window.supabase : (window.Supabase ? window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
 
         // Game State
         let gameState = {
