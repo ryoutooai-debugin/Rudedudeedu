@@ -518,14 +518,19 @@
     </div>
 
     <script>
-        // Supabase Setup - reuse existing CDN client or create new
+        // Supabase Setup
         const SUPABASE_URL = 'https://kyxoizlonqbahkothtaq.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5eG9pemxvbnFiYWhrb3RodGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2Mzc3NTEsImV4cCI6MjA5MDIxMzc1MX0.zCv5L5D3NZq2DNbT4I7FWw-raMGVnbp5LyI1M4XgjeY';
         
-        // Use existing supabase from CDN or create new client
-        var supabase = window.supabase ? window.supabase : (window.Supabase ? window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
+        // Create supabase client - check both window.supabase and window.Supabase
+        var supabase = null;
+        if (typeof window.Supabase !== 'undefined') {
+            supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } else if (typeof window.supabase !== 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
-        // Game State
+        // Stock symbols for the game (matches price.json keys)
         let gameState = {
             playerName: '',
             cash: 100000,
@@ -539,7 +544,7 @@
         let currentTrade = { symbol: '', action: '', price: 0 };
 
         // Stock symbols for the game (matches price.json keys)
-        const stockSymbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX'];
+        const stockSymbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'OXY', 'CVX', 'AMD', 'JPM', 'V', 'JNJ', 'UNH', 'HD', 'PG'];
         
         // Stock display names
         const stockNames = {
@@ -550,7 +555,16 @@
             'TSLA': 'Tesla Inc.',
             'META': 'Meta Platforms',
             'NVDA': 'NVIDIA Corp.',
-            'NFLX': 'Netflix Inc.'
+            'NFLX': 'Netflix Inc.',
+            'OXY': 'Occidental Petroleum',
+            'CVX': 'Chevron Corp.',
+            'AMD': 'Advanced Micro Devices',
+            'JPM': 'JPMorgan Chase',
+            'V': 'Visa Inc.',
+            'JNJ': 'Johnson & Johnson',
+            'UNH': 'UnitedHealth Group',
+            'HD': 'Home Depot',
+            'PG': 'Procter & Gamble'
         };
         
         // Stock data with prices loaded from price.json
