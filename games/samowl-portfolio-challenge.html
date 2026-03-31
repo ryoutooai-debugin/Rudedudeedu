@@ -602,7 +602,7 @@
                     .from('portfolio_leaderboard')
                     .upsert({ 
                         player_name: gameState.playerName, 
-                        score: totalValue,
+                        portfolio_value: totalValue,
                         updated_at: new Date().toISOString()
                     }, { onConflict: 'player_name' });
                 if (error) console.log('Supabase save error:', error);
@@ -903,7 +903,7 @@
                 const { data, error } = await getSupabase()
                     .from('portfolio_leaderboard')
                     .select('*')
-                    .order('score', { ascending: false })
+                    .order('portfolio_value', { ascending: false })
                     .limit(10);
                 
                 if (error) throw error;
@@ -915,7 +915,7 @@
                             <div class="leaderboard-item">
                                 <span class="leaderboard-rank">#${i + 1}</span>
                                 <span class="leaderboard-name">${entry.player_name}</span>
-                                <span class="leaderboard-value">$${entry.score.toLocaleString()}</span>
+                                <span class="leaderboard-value">$${entry.portfolio_value.toLocaleString()}</span>
                             </div>
                         `;
                     });
