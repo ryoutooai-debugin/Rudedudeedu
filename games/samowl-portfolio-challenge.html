@@ -178,8 +178,8 @@
         
         .stock-item {
             display: grid;
-            grid-template-columns: 80px 1fr 100px 100px;
-            gap: 15px;
+            grid-template-columns: 70px 1fr 100px 130px 100px;
+            gap: 10px;
             align-items: center;
             padding: 15px;
             background: rgba(255,255,255,0.03);
@@ -206,6 +206,7 @@
         .stock-change {
             text-align: right;
             font-weight: 600;
+            font-size: 0.9em;
         }
         
         .positive { color: var(--success); }
@@ -493,17 +494,37 @@
         </div>
     </div>
 
+    <!-- SamOwl Message Modal -->
+    <div class="modal-overlay" id="samowlModal" style="display: none;">
+        <div class="modal" style="text-align: center; max-width: 400px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">🦉</div>
+            <h3 style="margin-bottom: 15px; color: #667eea;">SamOwl Says</h3>
+            <p id="samowlMessage" style="margin: 20px 0; font-size: 1.1em; line-height: 1.5;"></p>
+            <button class="btn" onclick="closeSamOwlModal()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Got it!</button>
+        </div>
+    </div>
+
+    <!-- SamOwl Confirm Modal -->
+    <div class="modal-overlay" id="samowlConfirmModal" style="display: none;">
+        <div class="modal" style="text-align: center; max-width: 400px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">🦉</div>
+            <h3 style="margin-bottom: 15px; color: #667eea;">SamOwl Asks</h3>
+            <p id="samowlConfirmMessage" style="margin: 20px 0; font-size: 1.1em; line-height: 1.5;"></p>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" onclick="samowlConfirmYes()" style="flex: 1; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Yes</button>
+                <button class="btn" onclick="closeSamOwlConfirmModal()" style="flex: 1; padding: 15px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">No</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Supabase Setup - avoid duplicate declaration
-        const SUPABASE_URL = 'https://kyxoizlonqbahkothtaq.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5eG9pemxvbnFiYWhrb3RodGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2Mzc3NTEsImV4cCI6MjA5MDIxMzc1MX0.zCv5L5D3NZq2DNbT4I7FWw-raMGVnbp5LyI1M4XgjeY';
-        // Only create client if not already created
-        let supabaseClient;
-        if (window.supabase && window.supabase.createClient) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } else if (typeof supabase !== 'undefined') {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+        // Supabase Setup
+        const SUPABASE_URL = 'https://rtbqaqkobwwjnbzwvjab.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0YnFhcWtvYnd3am5iend2amFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDE2ODAsImV4cCI6MjA4ODgxNzY4MH0.EUnSeOMf3U6Uentgo1gcq-PfTgTI35SN92Vr9mdNO0Y';
+        
+        // Handle case where supabase is already declared by CDN library
+        const supabaseLib = window.supabase || window.Supabase;
+        const supabase = supabaseLib ? supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
         // Game State
         let gameState = {
@@ -511,30 +532,23 @@
             cash: 100000,
             holdings: {},
             startValue: 100000,
-            trades: []
+            trades: [],
+            level: 1,
+            startTime: Date.now()
         };
 
         let currentTrade = { symbol: '', action: '', price: 0 };
 
-        // Stock data - prices updated via price.json
+        // Stock data with realistic prices (base + daily movement)
         const stocks = [
-            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 252.89 },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 280.97 },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 365.97 },
-            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 207.68 },
-            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 372.11 },
-            { symbol: 'META', name: 'Meta Platforms', basePrice: 547.75 },
-            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 171.24 },
-            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 93.32 },
-            { symbol: 'OXY', name: 'Occidental Petroleum', basePrice: 64.36 },
-            { symbol: 'CVX', name: 'Chevron Corp.', basePrice: 207.79 },
-            { symbol: 'AMD', name: 'AMD Inc.', basePrice: 203.77 },
-            { symbol: 'JPM', name: 'JPMorgan Chase', basePrice: 291.66 },
-            { symbol: 'V', name: 'Visa Inc.', basePrice: 305.53 },
-            { symbol: 'JNJ', name: 'Johnson & Johnson', basePrice: 239.24 },
-            { symbol: 'UNH', name: 'UnitedHealth Group', basePrice: 268.05 },
-            { symbol: 'HD', name: 'Home Depot', basePrice: 328.43 },
-            { symbol: 'PG', name: 'Procter & Gamble', basePrice: 142.42 }
+            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 175.50, volatility: 0.02 },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 142.30, volatility: 0.025 },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 380.25, volatility: 0.018 },
+            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 178.90, volatility: 0.028 },
+            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 205.60, volatility: 0.045 },
+            { symbol: 'META', name: 'Meta Platforms', basePrice: 505.75, volatility: 0.032 },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 890.15, volatility: 0.038 },
+            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 625.40, volatility: 0.035 }
         ];
 
         // Load saved game
@@ -555,31 +569,19 @@
             return false;
         }
 
-        // Save game locally and to Supabase
+        // Save game locally (Supabase disabled)
         async function saveGame() {
             localStorage.setItem('portfolioChallenge', JSON.stringify(gameState));
-            
-            // Calculate total portfolio value
-            let holdingsValue = 0;
-            for (const [symbol, holding] of Object.entries(gameState.holdings)) {
-                const stock = stocks.find(s => s.symbol === symbol);
-                if (stock) {
-                    holdingsValue += holding.shares * stock.basePrice;
-                }
-            }
-            const totalValue = gameState.cash + holdingsValue;
-            
             // Save to Supabase leaderboard
+            const totalValue = gameState.cash + Object.values(gameState.holdings).reduce((sum, h) => sum + (h.shares * h.avgPrice), 0);
             try {
-                const { error } = await supabaseClient
-                    .from('portfolio_leaderboard')
-                    .upsert({
-                        player_name: gameState.playerName,
-                        portfolio_value: totalValue
-                    }, {
-                        onConflict: 'player_name'
-                    });
-                
+                const { error } = await supabase
+                    .from('leaderboard')
+                    .upsert({ 
+                        player_name: gameState.playerName, 
+                        score: totalValue,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'player_name' });
                 if (error) console.log('Supabase save error:', error);
             } catch (e) {
                 console.log('Supabase unavailable, using localStorage only');
@@ -606,32 +608,54 @@
             // Fetch real prices on start, then update every 30 seconds
             fetchRealPrices();
             setInterval(updatePrices, 30000);
-            // Update leaderboard every 30 seconds
-            setInterval(updateLeaderboard, 30000);
         }
 
-        // Fetch real prices from price.json (server-side updated)
+        // Fetch real prices from Yahoo Finance
         async function fetchRealPrices() {
             try {
-                const response = await fetch('price.json');
-                const prices = await response.json();
+                const symbols = stocks.map(s => s.symbol).join(',');
+                const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbols}?interval=1d&range=1d`);
+                const data = await response.json();
                 
-                // Update stock prices from JSON
-                stocks.forEach(stock => {
-                    if (prices[stock.symbol]) {
-                        stock.basePrice = prices[stock.symbol];
-                    }
-                });
+                if (data.chart && data.chart.result) {
+                    data.chart.result.forEach((result, index) => {
+                        if (result.meta && result.meta.regularMarketPrice) {
+                            stocks[index].basePrice = result.meta.regularMarketPrice;
+                            stocks[index].lastClose = stocks[index].lastClose || result.meta.previousClose;
+                            stocks[index].dailyChange = result.meta.regularMarketPrice - result.meta.previousClose;
+                        }
+                    });
+                }
             } catch (e) {
-                console.log('Using simulated prices (price.json unavailable)');
+                console.log('Using simulated prices (Yahoo Finance unavailable)');
+                // Fall back to simulated movement
+                simulatePriceMovement();
             }
             renderMarket();
             updateDashboard();
         }
 
+        // Simulate realistic price movements when API unavailable
+        function simulatePriceMovement() {
+            stocks.forEach(s => {
+                // Store previous price as lastClose for change calculation
+                if (!s.lastClose) s.lastClose = s.basePrice;
+                
+                // Random walk with mean reversion
+                const marketBias = (Math.random() - 0.48) * 0.005; // Slight upward bias
+                const stockMove = (Math.random() - 0.5) * s.volatility;
+                const totalMove = marketBias + stockMove;
+                
+                s.basePrice = s.basePrice * (1 + totalMove);
+                s.dailyChange = s.basePrice - s.lastClose;
+            });
+        }
+
         // Update stock prices (fallback to simulation if API fails)
         function updatePrices() {
-            fetchRealPrices();
+            simulatePriceMovement();
+            renderMarket();
+            updateDashboard();
         }
 
         // Switch tabs
@@ -642,11 +666,43 @@
             document.getElementById(tab + 'Tab').classList.add('active');
         }
 
+        // SamOwl Modal Functions
+        function showSamOwl(message) {
+            document.getElementById('samowlMessage').textContent = message;
+            document.getElementById('samowlModal').classList.add('show');
+        }
+
+        function closeSamOwlModal() {
+            document.getElementById('samowlModal').classList.remove('show');
+        }
+
+        // SamOwl Confirm Modal Functions
+        let samowlConfirmCallback = null;
+
+        function showSamOwlConfirm(message, onYes) {
+            document.getElementById('samowlConfirmMessage').textContent = message;
+            samowlConfirmCallback = onYes;
+            document.getElementById('samowlConfirmModal').classList.add('show');
+        }
+
+        function closeSamOwlConfirmModal() {
+            document.getElementById('samowlConfirmModal').classList.remove('show');
+            samowlConfirmCallback = null;
+        }
+
+        function samowlConfirmYes() {
+            if (samowlConfirmCallback) {
+                samowlConfirmCallback();
+            }
+            closeSamOwlConfirmModal();
+        }
+
         // Render market
         function renderMarket() {
             const list = document.getElementById('marketList');
             list.innerHTML = stocks.map(s => {
-                const change = (Math.random() - 0.5) * 2;
+                const change = s.dailyChange || 0;
+                const changePct = s.lastClose ? ((change / s.lastClose) * 100).toFixed(2) : '0.00';
                 const changeClass = change >= 0 ? 'positive' : 'negative';
                 const changeSymbol = change >= 0 ? '+' : '';
                 return `
@@ -654,6 +710,7 @@
                         <div class="stock-symbol">${s.symbol}</div>
                         <div>${s.name}</div>
                         <div class="stock-price">$${s.basePrice.toFixed(2)}</div>
+                        <div class="stock-change ${changeClass}">${changeSymbol}$${change.toFixed(2)} (${changeSymbol}${changePct}%)</div>
                         <div>
                             <button class="btn btn-buy" onclick="openTrade('${s.symbol}', 'buy')">Buy</button>
                         </div>
@@ -667,8 +724,12 @@
             const stock = stocks.find(s => s.symbol === symbol);
             currentTrade = { symbol, action, price: stock.basePrice };
             
+            const change = stock.dailyChange || 0;
+            const changeSymbol = change >= 0 ? '+' : '';
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            
             document.getElementById('modalTitle').textContent = `${action === 'buy' ? 'Buy' : 'Sell'} ${symbol}`;
-            document.getElementById('modalPrice').textContent = `$${stock.basePrice.toFixed(2)}`;
+            document.getElementById('modalPrice').innerHTML = `$${stock.basePrice.toFixed(2)} <span class="${changeClass}" style="font-size: 0.8em;">(${changeSymbol}$${change.toFixed(2)})</span>`;
             document.getElementById('modalCash').textContent = `$${gameState.cash.toLocaleString()}`;
             document.getElementById('modalShares').value = '';
             document.getElementById('modalTotal').textContent = '$0.00';
@@ -692,20 +753,20 @@
         function executeTrade() {
             const shares = parseInt(document.getElementById('modalShares').value);
             if (!shares || shares <= 0) {
-                alert('Please enter a valid number of shares');
+                showSamOwl('Please enter a valid number of shares');
                 return;
             }
-            
+
             const total = shares * currentTrade.price;
-            
+
             if (currentTrade.action === 'buy') {
                 if (total > gameState.cash) {
-                    alert('Not enough cash!');
+                    showSamOwl('Not enough cash! Sell some stocks or wait for prices to drop.');
                     return;
                 }
-                
+
                 gameState.cash -= total;
-                
+
                 if (gameState.holdings[currentTrade.symbol]) {
                     const h = gameState.holdings[currentTrade.symbol];
                     const newShares = h.shares + shares;
@@ -717,7 +778,7 @@
                         avgPrice: currentTrade.price
                     };
                 }
-                
+
                 gameState.trades.push({
                     symbol: currentTrade.symbol,
                     action: 'BUY',
@@ -726,10 +787,10 @@
                     total: total,
                     time: new Date().toISOString()
                 });
-                
-                alert(`Bought ${shares} shares of ${currentTrade.symbol} for $${total.toFixed(2)}`);
+
+                showSamOwl(`Bought ${shares} shares of ${currentTrade.symbol} for $${total.toFixed(2)}`);
             }
-            
+
             saveGame();
             updateDashboard();
             updateHoldings();
@@ -783,7 +844,6 @@
                             <th>Current</th>
                             <th>Value</th>
                             <th>P&L</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -802,7 +862,6 @@
                                     <td>$${currentPrice.toFixed(2)}</td>
                                     <td>$${value.toFixed(2)}</td>
                                     <td class="${pnlClass}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</td>
-                                    <td><button class="btn btn-sell" onclick="openTrade('${symbol}', 'sell')">Sell</button></td>
                                 </tr>
                             `;
                         }).join('')}
@@ -813,60 +872,67 @@
 
         // Reset game function
         function resetGame() {
-            if (confirm('Start a new game? Your current progress will be saved separately.')) {
+            showSamOwlConfirm('Start a new game? Your current progress will be saved separately.', function() {
                 localStorage.removeItem('portfolioChallenge');
                 location.reload();
-            }
+            });
         }
 
         // Update leaderboard from Supabase
         async function updateLeaderboard() {
+            const list = document.getElementById('leaderboardList');
             try {
-                // Fetch top 50 from Supabase
-                const { data: players, error } = await supabaseClient
-                    .from('portfolio_leaderboard')
+                const { data, error } = await supabase
+                    .from('leaderboard')
                     .select('*')
-                    .order('portfolio_value', { ascending: false })
-                    .limit(50);
+                    .order('score', { ascending: false })
+                    .limit(10);
                 
                 if (error) throw error;
                 
-                // Calculate current player's value
-                let currentValue = gameState.cash;
-                for (const [symbol, h] of Object.entries(gameState.holdings)) {
-                    const stock = stocks.find(s => s.symbol === symbol);
-                    if (stock) {
-                        currentValue += h.shares * stock.basePrice;
-                    }
-                }
-                
-                // Find player's rank
-                const rank = players.findIndex(p => p.player_name === gameState.playerName) + 1;
-                document.getElementById('dashRank').textContent = rank > 0 ? `#${rank}` : '#--';
-                
-                // Render leaderboard
-                const list = document.getElementById('leaderboardList');
-                if (players && players.length > 0) {
-                    list.innerHTML = players.map((p, i) => `
-                        <div class="leaderboard-item">
-                            <div class="leaderboard-rank">#${i + 1}</div>
-                            <div class="leaderboard-name">${p.player_name}</div>
-                            <div class="leaderboard-value">$${p.portfolio_value.toLocaleString()}</div>
-                        </div>
-                    `).join('');
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach((entry, i) => {
+                        html += `
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank">#${i + 1}</span>
+                                <span class="leaderboard-name">${entry.player_name}</span>
+                                <span class="leaderboard-value">$${entry.score.toLocaleString()}</span>
+                            </div>
+                        `;
+                    });
+                    if (list) list.innerHTML = html;
+                    
+                    // Update user's rank
+                    const userRank = data.findIndex(e => e.player_name === gameState.playerName);
+                    document.getElementById('dashRank').textContent = userRank >= 0 ? `#${userRank + 1}` : '#--';
                 } else {
-                    list.innerHTML = '<div class="empty-state">No traders yet. Be the first!</div>';
+                    if (list) list.innerHTML = '<div class="empty-state">No players yet. Be the first!</div>';
                 }
             } catch (e) {
-                console.log('Supabase error, falling back to localStorage:', e);
-                // Fallback to localStorage
-                const list = document.getElementById('leaderboardList');
-                list.innerHTML = '<div class="empty-state">Leaderboard unavailable. Playing in local mode.</div>';
+                console.log('Leaderboard error:', e);
+                if (list) list.innerHTML = '<div class="empty-state">Leaderboard unavailable</div>';
             }
         }
 
         // Load saved game on page load
         window.onload = function() {
+            // Check for saved game first
+            const saved = localStorage.getItem('portfolioChallenge');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.playerName && parsed.cash !== undefined) {
+                        // Show resume hint on start screen
+                        document.getElementById('resumeHint').style.display = 'block';
+                        document.getElementById('playerNameInput').value = parsed.playerName;
+                        document.getElementById('playerNameInput').placeholder = 'Welcome back, ' + parsed.playerName + '!';
+                    }
+                } catch (e) {
+                    console.log('Error checking saved game:', e);
+                }
+            }
+            
             if (loadGame()) {
                 // Auto-resume saved game
                 document.getElementById('startScreen').classList.add('hidden');
@@ -878,8 +944,30 @@
                 updateLeaderboard();
                 fetchRealPrices();
                 setInterval(updatePrices, 30000);
+                
+                // Submit score for OWLs periodically
+                setInterval(() => {
+                    let portfolioValue = gameState.cash;
+                    for (const [symbol, h] of Object.entries(gameState.holdings)) {
+                        const stock = stocks.find(s => s.symbol === symbol);
+                        if (stock) {
+                            portfolioValue += h.shares * stock.basePrice;
+                        }
+                    }
+                    
+                    const extras = {
+                        portfolio: portfolioValue,
+                        cash: gameState.cash,
+                        timeElapsed: Math.floor((Date.now() - gameState.startTime) / 1000)
+                    };
+                    
+                    if (typeof submitScore === 'function') {
+                        submitScore('portfolio-challenge', portfolioValue, 1, 0, extras);
+                    }
+                }, 120000); // Every 2 minutes
             }
         };
     </script>
+    <script src="owl-integration.js"></script>
 </body>
 </html>
