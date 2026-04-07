@@ -524,7 +524,10 @@
         
         // Handle case where supabase is already declared by CDN library
         const supabaseLib = window.supabase || window.Supabase;
-        const supabase = supabaseLib ? supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        let supabase = null;
+        if (supabaseLib) {
+            supabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         // Game State
         let gameState = {
