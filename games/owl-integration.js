@@ -252,13 +252,12 @@ async function loadOwlBalance() {
         const response = await fetch(`${OWL_CONFIG.apiUrl}/owls?user_id=${encodeURIComponent(userId)}`);
         const data = await response.json();
         
-        // Use the higher of server or local balance (don't lose progress!)
-        const totalOwls = Math.max(data.owls || 0, localOwls);
+        // Use server as source of truth, but respect local if server is down
+        const serverOwls = data.owls || 0;
+        const totalOwls = serverOwls > 0 ? serverOwls : localOwls;
         
-        // Update localStorage with server value if it's higher
-        if (data.owls > localOwls) {
-            localStorage.setItem('samowl_owls', data.owls);
-        }
+        // Always update localStorage with server value (source of truth)
+        localStorage.setItem('samowl_owls', totalOwls);
         
         const button = document.getElementById('owl-store-floating-btn');
         if (button) {
@@ -435,6 +434,8 @@ async function buyItem(itemId, item) {
         if (data.success) {
             showOwlNotification(0, [`Purchased ${item.name}!`]);
             document.getElementById('store-owl-balance').textContent = data.remaining_owls.toLocaleString();
+            // Update localStorage immediately so balance doesn't revert!
+            localStorage.setItem('samowl_owls', data.remaining_owls);
             updateOwlButton(0);
             loadOwlBalance();
             SoundManager.play('buy');
