@@ -518,23 +518,23 @@
 
         // Stock data - prices updated via price.json
         const stocks = [
-            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 252.89 },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 280.97 },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 365.97 },
-            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 207.68 },
-            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 372.11 },
-            { symbol: 'META', name: 'Meta Platforms', basePrice: 547.75 },
-            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 171.24 },
-            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 93.32 },
-            { symbol: 'OXY', name: 'Occidental Petroleum', basePrice: 64.36 },
-            { symbol: 'CVX', name: 'Chevron Corp.', basePrice: 207.79 },
-            { symbol: 'AMD', name: 'AMD Inc.', basePrice: 203.77 },
-            { symbol: 'JPM', name: 'JPMorgan Chase', basePrice: 291.66 },
-            { symbol: 'V', name: 'Visa Inc.', basePrice: 305.53 },
-            { symbol: 'JNJ', name: 'Johnson & Johnson', basePrice: 239.24 },
-            { symbol: 'UNH', name: 'UnitedHealth Group', basePrice: 268.05 },
-            { symbol: 'HD', name: 'Home Depot', basePrice: 328.43 },
-            { symbol: 'PG', name: 'Procter & Gamble', basePrice: 142.42 }
+            { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 252.89, prevPrice: 252.89 },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', basePrice: 280.97, prevPrice: 280.97 },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', basePrice: 365.97, prevPrice: 365.97 },
+            { symbol: 'AMZN', name: 'Amazon.com', basePrice: 207.68, prevPrice: 207.68 },
+            { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 372.11, prevPrice: 372.11 },
+            { symbol: 'META', name: 'Meta Platforms', basePrice: 547.75, prevPrice: 547.75 },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 171.24, prevPrice: 171.24 },
+            { symbol: 'NFLX', name: 'Netflix Inc.', basePrice: 93.32, prevPrice: 93.32 },
+            { symbol: 'OXY', name: 'Occidental Petroleum', basePrice: 64.36, prevPrice: 64.36 },
+            { symbol: 'CVX', name: 'Chevron Corp.', basePrice: 207.79, prevPrice: 207.79 },
+            { symbol: 'AMD', name: 'AMD Inc.', basePrice: 203.77, prevPrice: 203.77 },
+            { symbol: 'JPM', name: 'JPMorgan Chase', basePrice: 291.66, prevPrice: 291.66 },
+            { symbol: 'V', name: 'Visa Inc.', basePrice: 305.53, prevPrice: 305.53 },
+            { symbol: 'JNJ', name: 'Johnson & Johnson', basePrice: 239.24, prevPrice: 239.24 },
+            { symbol: 'UNH', name: 'UnitedHealth Group', basePrice: 268.05, prevPrice: 268.05 },
+            { symbol: 'HD', name: 'Home Depot', basePrice: 328.43, prevPrice: 328.43 },
+            { symbol: 'PG', name: 'Procter & Gamble', basePrice: 142.42, prevPrice: 142.42 }
         ];
 
         // Load saved game
@@ -616,9 +616,10 @@
                 const response = await fetch('price.json');
                 const prices = await response.json();
                 
-                // Update stock prices from JSON
+                // Update stock prices from JSON, track previous price
                 stocks.forEach(stock => {
                     if (prices[stock.symbol]) {
+                        stock.prevPrice = stock.basePrice; // Save old price before updating
                         stock.basePrice = prices[stock.symbol];
                     }
                 });
@@ -627,6 +628,7 @@
             }
             renderMarket();
             updateDashboard();
+            updateHoldings();
         }
 
         // Update stock prices (fallback to simulation if API fails)
@@ -640,13 +642,20 @@
             event.target.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tab + 'Tab').classList.add('active');
+            
+            // Re-render market when switching to market tab
+            if (tab === 'market') {
+                renderMarket();
+            }
         }
 
         // Render market
         function renderMarket() {
             const list = document.getElementById('marketList');
             list.innerHTML = stocks.map(s => {
-                const change = (Math.random() - 0.5) * 2;
+                // Calculate change from previous price
+                const change = s.basePrice - s.prevPrice;
+                const changePct = s.prevPrice > 0 ? (change / s.prevPrice * 100) : 0;
                 const changeClass = change >= 0 ? 'positive' : 'negative';
                 const changeSymbol = change >= 0 ? '+' : '';
                 return `
@@ -654,6 +663,7 @@
                         <div class="stock-symbol">${s.symbol}</div>
                         <div>${s.name}</div>
                         <div class="stock-price">$${s.basePrice.toFixed(2)}</div>
+                        <div class="${changeClass}" style="font-weight: bold;">${changeSymbol}$${change.toFixed(2)} (${changeSymbol}${changePct.toFixed(1)}%)</div>
                         <div>
                             <button class="btn btn-buy" onclick="openTrade('${s.symbol}', 'buy')">Buy</button>
                         </div>
