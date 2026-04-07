@@ -740,6 +740,40 @@
                 alert(`Bought ${shares} shares of ${currentTrade.symbol} for $${total.toFixed(2)}`);
             }
             
+            // Handle SELL
+            if (currentTrade.action === 'sell') {
+                if (!gameState.holdings[currentTrade.symbol]) {
+                    alert('You don\'t own any shares of this stock!');
+                    return;
+                }
+                
+                const holding = gameState.holdings[currentTrade.symbol];
+                if (shares > holding.shares) {
+                    alert(`You only own ${holding.shares} shares!`);
+                    return;
+                }
+                
+                const proceeds = shares * currentTrade.price;
+                gameState.cash += proceeds;
+                
+                if (shares === holding.shares) {
+                    delete gameState.holdings[currentTrade.symbol];
+                } else {
+                    holding.shares -= shares;
+                }
+                
+                gameState.trades.push({
+                    symbol: currentTrade.symbol,
+                    action: 'SELL',
+                    shares: shares,
+                    price: currentTrade.price,
+                    total: proceeds,
+                    time: new Date().toISOString()
+                });
+                
+                alert(`Sold ${shares} shares of ${currentTrade.symbol} for $${proceeds.toFixed(2)}`);
+            }
+            
             saveGame();
             updateDashboard();
             updateHoldings();
