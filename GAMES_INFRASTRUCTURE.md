@@ -59,7 +59,7 @@ git push public main  # or use GitHub API
 GITHUB_TOKEN=ghp_YOUR_TOKEN_HERE
 
 # Supabase (for leaderboards)
-GAME_SUPABASE_URL=https://kyxoizlonqbahkothtaq.supabase.co
+GAME_SUPABASE_URL=https://rtbqaqkobwwjnbzwvjab.supabase.co
 GAME_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
