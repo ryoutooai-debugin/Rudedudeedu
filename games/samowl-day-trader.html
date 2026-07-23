@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🦉 SamOwl's Day Trader - Intraday Replay Sim</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; font-family: 'Segoe UI', 'Arial', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 10px; }
+        .game-container { width: 100%; max-width: 600px; background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); border-radius: 25px; box-shadow: 0 25px 80px rgba(0,0,0,0.5); overflow: hidden; position: relative; color: white; }
+
+        .header { background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); padding: 16px; text-align: center; }
+        .brand { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .brand .owl { font-size: 2.3em; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(5deg); } }
+        .brand h1 { font-size: 1.4em; } .brand p { font-size: 0.8em; opacity: 0.9; }
+        .age-badge { display: inline-block; background: #ffd700; color: #333; padding: 3px 12px; border-radius: 20px; font-size: 0.75em; font-weight: bold; margin-top: 6px; }
+
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; background: rgba(255,255,255,0.05); }
+        .stat { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px; text-align: center; }
+        .stat .lbl { font-size: 0.65em; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .stat .val { font-size: 1.15em; font-weight: bold; margin-top: 4px; }
+        .positive { color: #4ade80; } .negative { color: #f87171; } .flat { color: #cbd5e1; }
+
+        .day-bar { padding: 8px 15px; background: rgba(0,0,0,0.25); font-size: 0.72em; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
+        .day-track { flex: 1; height: 6px; background: rgba(0,0,0,0.4); border-radius: 3px; margin: 0 10px; overflow: hidden; }
+        .day-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #0ea5e9, #6366f1); border-radius: 3px; }
+
+        .chart-wrap { padding: 12px 12px 0; }
+        .chart-box { background: rgba(0,0,0,0.35); border-radius: 14px; padding: 8px; position: relative; }
+        svg { width: 100%; height: 240px; display: block; }
+        .pos-flag { position: absolute; top: 10px; left: 14px; font-size: 0.8em; font-weight: bold; padding: 4px 10px; border-radius: 8px; background: rgba(0,0,0,0.4); }
+
+        .toggles { display: flex; gap: 8px; padding: 10px 14px; flex-wrap: wrap; }
+        .toggle { font-size: 0.75em; padding: 6px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); cursor: pointer; color: #cbd5e1; user-select: none; }
+        .toggle.on { background: linear-gradient(135deg, #0ea5e9, #6366f1); border-color: transparent; color: white; }
+
+        .coach { margin: 4px 14px 10px; min-height: 34px; font-size: 0.8em; color: #fde68a; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; gap: 6px; }
+
+        .pos-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 0 14px; }
+        .pbtn { padding: 14px 6px; border: none; border-radius: 14px; font-weight: bold; font-size: 1em; cursor: pointer; color: white; transition: transform 0.1s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .pbtn:active { transform: translateY(3px); }
+        .pbtn small { font-weight: normal; font-size: 0.62em; opacity: 0.85; }
+        .pbtn.long { background: linear-gradient(180deg, #22c55e, #16a34a); box-shadow: 0 5px 0 #15803d; }
+        .pbtn.short { background: linear-gradient(180deg, #ef4444, #dc2626); box-shadow: 0 5px 0 #b91c1c; }
+        .pbtn.flat { background: linear-gradient(180deg, #64748b, #475569); box-shadow: 0 5px 0 #334155; }
+        .pbtn.active { outline: 3px solid #fde68a; }
+
+        .playbar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; }
+        .pctl { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: white; padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
+        .pctl.primary { background: linear-gradient(135deg, #0ea5e9, #6366f1); border-color: transparent; }
+
+        .screen { position: absolute; inset: 0; background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; padding: 30px; text-align: center; }
+        .screen.hidden { display: none; }
+        .screen .big { font-size: 5em; margin-bottom: 14px; animation: float 2s ease-in-out infinite; }
+        .screen h2 { font-size: 1.7em; margin-bottom: 8px; } .screen p { color: #94a3b8; margin-bottom: 18px; font-size: 1em; max-width: 380px; }
+        .btn { padding: 15px 44px; font-size: 1.1em; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 30px rgba(14,165,233,0.4); }
+        .btn.ghost { background: rgba(255,255,255,0.08); box-shadow: none; border: 1px solid rgba(255,255,255,0.15); margin-top: 12px; font-size: 0.95em; padding: 12px 30px; }
+        .recap { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 16px 22px; margin-bottom: 18px; text-align: left; font-size: 0.95em; line-height: 1.9; }
+        .recap b { color: #fde68a; }
+
+        .back { padding: 9px 15px; background: rgba(0,0,0,0.2); }
+        .back a { color: white; text-decoration: none; font-size: 0.85em; background: rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 20px; }
+        .help-owl { position: fixed; bottom: 18px; right: 18px; font-size: 1.5em; cursor: pointer; z-index: 9999; background: #6366f1; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Start -->
+        <div class="screen" id="startScreen">
+            <div class="big">🦉</div>
+            <h2>SamOwl's Day Trader</h2>
+            <p>The market plays out one minute at a time. Go <b style="color:#4ade80">LONG</b> if you think it'll rise, <b style="color:#f87171">SHORT</b> if you think it'll fall. Read the trend, time your exit, and finish the day green!</p>
+            <div class="age-badge">Ages 13+ · Advanced</div>
+            <br>
+            <button class="btn" onclick="newDay()">🚀 Start Trading Day</button>
+        </div>
+
+        <!-- Recap -->
+        <div class="screen hidden" id="recapScreen">
+            <div class="big" id="recapEmoji">📊</div>
+            <h2 id="recapTitle">Market Closed</h2>
+            <div class="recap" id="recapBody"></div>
+            <button class="btn" onclick="newDay()">▶ New Day</button>
+            <button class="btn ghost" onclick="replayDay()">↻ Replay This Day</button>
+        </div>
+
+        <div class="header">
+            <div class="brand"><div class="owl">🦉</div><div><h1>Day Trader</h1><p>Intraday Replay Sim</p></div></div>
+            <div class="age-badge">Ages 13+</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat"><div class="lbl">Equity</div><div class="val" id="equity">$10,000</div></div>
+            <div class="stat"><div class="lbl">Open P&L</div><div class="val flat" id="openPnl">$0</div></div>
+            <div class="stat"><div class="lbl">Position</div><div class="val flat" id="posLabel">FLAT</div></div>
+        </div>
+
+        <div class="day-bar">
+            <span id="clock">9:30</span>
+            <div class="day-track"><div class="day-fill" id="dayFill"></div></div>
+            <span>🏆 <span id="best">$0</span></span>
+        </div>
+
+        <div class="back"><a href="index.html">← Back to Games</a></div>
+
+        <div class="chart-wrap">
+            <div class="chart-box">
+                <div class="pos-flag" id="posFlag" style="display:none;"></div>
+                <svg id="chart" viewBox="0 0 560 240" preserveAspectRatio="none"></svg>
+            </div>
+        </div>
+
+        <div class="toggles">
+            <div class="toggle on" id="tgMa" onclick="toggleInd('ma')">📏 Moving Avg</div>
+            <div class="toggle" id="tgVwap" onclick="toggleInd('vwap')">⚖️ VWAP</div>
+            <div class="toggle" id="tgMom" onclick="toggleInd('mom')">⚡ Momentum</div>
+        </div>
+
+        <div class="coach" id="coach">🦉 Press Play — watch the trend before you jump in.</div>
+
+        <div class="pos-buttons">
+            <button class="pbtn long" id="btnLong" onclick="setPos(1)"><span>📈 LONG</span><small>bet it rises</small></button>
+            <button class="pbtn flat active" id="btnFlat" onclick="setPos(0)"><span>✋ FLAT</span><small>no position</small></button>
+            <button class="pbtn short" id="btnShort" onclick="setPos(-1)"><span>📉 SHORT</span><small>bet it falls</small></button>
+        </div>
+
+        <div class="playbar">
+            <button class="pctl primary" id="playBtn" onclick="togglePlay()">▶ Play</button>
+            <button class="pctl" onclick="stepBar()">⏭ Step</button>
+            <button class="pctl" id="speedBtn" onclick="cycleSpeed()">1×</button>
+        </div>
+    </div>
+
+    <div class="help-owl" onclick="alert('How to play:\n\n• Press Play — the day streams in one minute at a time.\n• LONG if you think price will rise, SHORT if you think it will fall, FLAT to sit out.\n• Your Open P&L updates every bar. Go FLAT to lock in a profit (or cut a loss).\n• Use the Moving Average to spot the trend — trading WITH the trend is safer.\n• Finish the day with more than $10,000. Beat your high score!')">❓</div>
+
+    <script>
+        // ---------- config ----------
+        const START_CASH = 10000, SHARES = 100, DAY_BARS = 180, WARMUP = 30, VIS = 48;
+        const SPEEDS = [1, 2, 4], SPEED_MS = { 1: 700, 2: 380, 4: 180 };
+        const SAVE_KEY = 'samowlDayTrader_best';
+
+        // ---------- seeded RNG ----------
+        function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+        // ---------- synthetic day generator ----------
+        function genDay(seed) {
+            const rnd = mulberry32(seed);
+            const bars = [];
+            let price = 40 + rnd() * 260;
+            let trend = (rnd() - 0.5) * 0.0016;
+            let cumTPV = 0, cumV = 0;
+            for (let i = 0; i < DAY_BARS; i++) {
+                if (rnd() < 0.06) trend = (rnd() - 0.5) * 0.0022;          // regime shift
+                const vol = 0.0025 + (i < 25 ? 0.004 : 0) + rnd() * 0.003;  // busier at the open
+                const drift = trend + (rnd() - 0.5) * 2 * vol;
+                const open = price;
+                const close = Math.max(1, open * (1 + drift));
+                const hi = Math.max(open, close) * (1 + rnd() * vol * 0.6);
+                const lo = Math.min(open, close) * (1 - rnd() * vol * 0.6);
+                const volm = 500 + rnd() * 1500 + (Math.abs(drift) * 40000);
+                const tp = (hi + lo + close) / 3;
+                cumTPV += tp * volm; cumV += volm;
+                bars.push({ o: open, h: hi, l: lo, c: close, vwap: cumTPV / cumV });
+                price = close;
+            }
+            return bars;
+        }
+
+        // ---------- state ----------
+        let g = null, timer = null, speedIdx = 0;
+
+        function newDay() { start((Math.floor(Date.now() / 1) ^ Math.floor(Math.random() * 1e9)) >>> 0); }
+        function replayDay() { if (g) start(g.seed); }
+
+        function start(seed) {
+            g = {
+                seed, bars: genDay(seed), idx: WARMUP, cash: START_CASH,
+                pos: 0, entry: 0, trades: [], show: { ma: true, vwap: false, mom: false },
+                best: loadBest(), over: false
+            };
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('recapScreen').classList.add('hidden');
+            syncToggles(); setPosButtons(); pause();
+            document.getElementById('coach').textContent = '🦉 Press Play — watch the trend before you jump in.';
+            render();
+        }
+
+        // ---------- indicators ----------
+        function maAt(i, n = 20) {
+            if (i < n - 1) return null;
+            let s = 0; for (let k = i - n + 1; k <= i; k++) s += g.bars[k].c;
+            return s / n;
+        }
+        function momAt(i) { const f = maAt(i, 5), s = maAt(i, 20); return (f != null && s != null) ? f - s : null; }
+
+        // ---------- play loop ----------
+        function togglePlay() { timer ? pause() : play(); }
+        function play() {
+            if (g.over) return;
+            pause();
+            timer = setInterval(stepBar, SPEED_MS[SPEEDS[speedIdx]]);
+            document.getElementById('playBtn').textContent = '⏸ Pause';
+        }
+        function pause() { if (timer) clearInterval(timer); timer = null; document.getElementById('playBtn').textContent = '▶ Play'; }
+        function cycleSpeed() { speedIdx = (speedIdx + 1) % SPEEDS.length; document.getElementById('speedBtn').textContent = SPEEDS[speedIdx] + '×'; if (timer) play(); }
+
+        function stepBar() {
+            if (g.over) return;
+            if (g.idx >= DAY_BARS - 1) { endDay(); return; }
+            g.idx++;
+            render();
+            if (g.idx >= DAY_BARS - 1) endDay();
+        }
+
+        // ---------- trading ----------
+        function price() { return g.bars[g.idx].c; }
+        function setPos(dir) {
+            if (g.over) return;
+            const p = price();
+            if (g.pos === dir) return;
+            if (g.pos !== 0) {                       // realize current trade
+                const pnl = g.pos * (p - g.entry) * SHARES;
+                g.cash += pnl;
+                g.trades.push({ dir: g.pos, entry: g.entry, exit: p, pnl });
+                coachClose(pnl, g.pos, p);
+            }
+            g.pos = dir;
+            g.entry = dir !== 0 ? p : 0;
+            if (dir !== 0) coachOpen(dir, p);
+            setPosButtons(); render();
+        }
+
+        function coachOpen(dir, p) {
+            const ma = maAt(g.idx);
+            let msg;
+            if (ma == null) msg = dir === 1 ? '📈 Long! Watch if the price keeps climbing.' : '📉 Short! Watch if the price keeps falling.';
+            else if (dir === 1) msg = p >= ma ? '📈 Long, and price is above the average — trading with an uptrend. 👍' : '📈 Long, but price is below the average — you\'re fighting a downtrend. Risky!';
+            else msg = p <= ma ? '📉 Short, and price is below the average — with the downtrend. 👍' : '📉 Short, but price is above the average — fighting an uptrend. Risky!';
+            setCoach(msg);
+        }
+        function coachClose(pnl, dir, p) {
+            if (pnl >= 0) setCoach(`💰 Closed for +$${pnl.toFixed(0)}! ${dir === 1 ? 'Bought low, sold higher' : 'Sold high, covered lower'} — nice timing. 🎉`);
+            else setCoach(`📉 Closed for -$${Math.abs(pnl).toFixed(0)}. The move went against you — cutting a loss early is smart, don't chase it. 🦉`);
+        }
+        function setCoach(m) { document.getElementById('coach').textContent = m; }
+
+        // ---------- end of day ----------
+        function endDay() {
+            if (g.over) return;
+            pause();
+            if (g.pos !== 0) { const p = price(); const pnl = g.pos * (p - g.entry) * SHARES; g.cash += pnl; g.trades.push({ dir: g.pos, entry: g.entry, exit: p, pnl }); g.pos = 0; }
+            g.over = true;
+            const net = g.cash - START_CASH;
+            const wins = g.trades.filter(t => t.pnl > 0).length;
+            const wr = g.trades.length ? Math.round(wins / g.trades.length * 100) : 0;
+            let record = false;
+            if (g.cash > g.best) { g.best = g.cash; saveBest(g.cash); record = true; }
+            const good = net >= 0;
+            document.getElementById('recapEmoji').textContent = record ? '🏆' : good ? '✅' : '📚';
+            document.getElementById('recapTitle').textContent = record ? 'New High Score!' : good ? 'Green Day!' : 'Market Closed';
+            document.getElementById('recapBody').innerHTML =
+                `<div>Final equity: <b>$${g.cash.toFixed(0)}</b></div>
+                 <div>Day P&L: <b class="${good ? 'positive' : 'negative'}">${good ? '+' : '-'}$${Math.abs(net).toFixed(0)}</b></div>
+                 <div>Trades: <b>${g.trades.length}</b> · Win rate: <b>${wr}%</b></div>
+                 <div>Best ever: <b>$${g.best.toFixed(0)}</b></div>
+                 <div style="margin-top:6px;color:#94a3b8;font-size:0.85em">${good ? 'You finished the day up — the trend was your friend.' : 'Under $10k this time. Try trading WITH the moving average and exiting sooner.'}</div>`;
+            document.getElementById('recapScreen').classList.remove('hidden');
+            render();
+        }
+
+        // ---------- persistence ----------
+        function loadBest() { try { return Number(localStorage.getItem(SAVE_KEY)) || START_CASH; } catch (e) { return START_CASH; } }
+        function saveBest(v) { try { localStorage.setItem(SAVE_KEY, String(Math.round(v))); } catch (e) {} }
+
+        // ---------- toggles ----------
+        function toggleInd(k) { g.show[k] = !g.show[k]; syncToggles(); render(); }
+        function syncToggles() {
+            document.getElementById('tgMa').classList.toggle('on', g.show.ma);
+            document.getElementById('tgVwap').classList.toggle('on', g.show.vwap);
+            document.getElementById('tgMom').classList.toggle('on', g.show.mom);
+        }
+        function setPosButtons() {
+            document.getElementById('btnLong').classList.toggle('active', g.pos === 1);
+            document.getElementById('btnFlat').classList.toggle('active', g.pos === 0);
+            document.getElementById('btnShort').classList.toggle('active', g.pos === -1);
+        }
+
+        // ---------- render ----------
+        function fmt(v) { return '$' + Math.round(v).toLocaleString(); }
+        function render() {
+            const p = price();
+            const openPnl = g.pos !== 0 ? g.pos * (p - g.entry) * SHARES : 0;
+            const equity = g.cash + openPnl;
+
+            const eq = document.getElementById('equity'); eq.textContent = fmt(equity);
+            eq.className = 'val ' + (equity >= START_CASH ? 'positive' : 'negative');
+            const op = document.getElementById('openPnl');
+            op.textContent = (openPnl >= 0 ? '+' : '-') + '$' + Math.abs(openPnl).toFixed(0);
+            op.className = 'val ' + (g.pos === 0 ? 'flat' : openPnl >= 0 ? 'positive' : 'negative');
+            const pl = document.getElementById('posLabel');
+            pl.textContent = g.pos === 1 ? 'LONG' : g.pos === -1 ? 'SHORT' : 'FLAT';
+            pl.className = 'val ' + (g.pos === 1 ? 'positive' : g.pos === -1 ? 'negative' : 'flat');
+            document.getElementById('best').textContent = fmt(g.best);
+
+            const mins = 570 + g.idx;                 // 9:30 = 570 minutes
+            document.getElementById('clock').textContent = `${Math.floor(mins / 60)}:${String(mins % 60).padStart(2, '0')}`;
+            document.getElementById('dayFill').style.width = (g.idx / (DAY_BARS - 1) * 100) + '%';
+
+            const flag = document.getElementById('posFlag');
+            if (g.pos !== 0) { flag.style.display = 'block'; flag.textContent = (g.pos === 1 ? '📈 LONG @ ' : '📉 SHORT @ ') + '$' + g.entry.toFixed(2); flag.style.color = g.pos === 1 ? '#4ade80' : '#f87171'; }
+            else flag.style.display = 'none';
+
+            drawChart();
+        }
+
+        function drawChart() {
+            const W = 560, H = 240, PAD = 8;
+            const lo = Math.max(0, g.idx - VIS + 1), hi = g.idx;
+            const win = g.bars.slice(lo, hi + 1);
+            let min = Infinity, max = -Infinity;
+            win.forEach(b => { min = Math.min(min, b.l); max = Math.max(max, b.h); });
+            if (g.show.vwap) win.forEach(b => { min = Math.min(min, b.vwap); max = Math.max(max, b.vwap); });
+            if (g.show.ma) for (let i = lo; i <= hi; i++) { const m = maAt(i); if (m != null) { min = Math.min(min, m); max = Math.max(max, m); } }
+            const rng = (max - min) || 1;
+            const n = win.length;
+            const cw = (W - PAD * 2) / Math.max(n, 1);
+            const y = v => PAD + (1 - (v - min) / rng) * (H - PAD * 2);
+            const x = i => PAD + i * cw + cw / 2;
+
+            let s = '';
+            // candles
+            win.forEach((b, i) => {
+                const up = b.c >= b.o, col = up ? '#22c55e' : '#ef4444';
+                const cx = x(i), bw = Math.max(2, cw * 0.6);
+                s += `<line x1="${cx}" y1="${y(b.h).toFixed(1)}" x2="${cx}" y2="${y(b.l).toFixed(1)}" stroke="${col}" stroke-width="1"/>`;
+                const yo = y(b.o), yc = y(b.c), top = Math.min(yo, yc), h = Math.max(1.5, Math.abs(yo - yc));
+                s += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" rx="1"/>`;
+            });
+            // MA line
+            if (g.show.ma) {
+                let pts = '';
+                win.forEach((b, i) => { const m = maAt(lo + i); if (m != null) pts += `${x(i).toFixed(1)},${y(m).toFixed(1)} `; });
+                if (pts) s += `<polyline points="${pts}" fill="none" stroke="#fbbf24" stroke-width="1.6"/>`;
+            }
+            // VWAP line
+            if (g.show.vwap) {
+                let pts = ''; win.forEach((b, i) => { pts += `${x(i).toFixed(1)},${y(b.vwap).toFixed(1)} `; });
+                s += `<polyline points="${pts}" fill="none" stroke="#38bdf8" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+            }
+            // entry line
+            if (g.pos !== 0) { const ey = y(g.entry); s += `<line x1="${PAD}" y1="${ey.toFixed(1)}" x2="${W - PAD}" y2="${ey.toFixed(1)}" stroke="${g.pos === 1 ? '#4ade80' : '#f87171'}" stroke-width="1" stroke-dasharray="5 4" opacity="0.7"/>`; }
+            // momentum badge
+            if (g.show.mom) { const m = momAt(g.idx); if (m != null) { const on = m >= 0; s += `<rect x="${W - 118}" y="10" width="108" height="22" rx="6" fill="${on ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}"/><text x="${W - 64}" y="25" fill="${on ? '#4ade80' : '#f87171'}" font-size="12" font-weight="bold" text-anchor="middle">${on ? '⚡ UP MOMENTUM' : '⚡ DOWN MOMENTUM'}</text>`; } }
+
+            document.getElementById('chart').innerHTML = s;
+        }
+
+        // resume best score display on load
+        document.getElementById('best').textContent = fmt(loadBest());
+    </script>
+</body>
+</html>
