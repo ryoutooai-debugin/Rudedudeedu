@@ -31,6 +31,7 @@
         .candlestick.bull .candle-body { background: linear-gradient(180deg, var(--success) 0%, #059669 100%); border: 2px solid #34d399; }
         .candlestick.bear .candle-body { background: linear-gradient(180deg, var(--danger) 0%, #dc2626 100%); border: 2px solid #f87171; }
         .candlestick.mystery .candle-body { background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%); border: 2px dashed #9ca3af; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
+        .candlestick.doji .candle-body { background: #94a3b8; border: 1px solid #cbd5e1; }
         .pattern-info { background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--primary); }
         .pattern-name { font-size: 1.3em; font-weight: 700; margin-bottom: 10px; color: #fbbf24; }
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
@@ -137,8 +138,8 @@
             { id: 'engulfing_bear', name: 'Bearish Engulfing', description: 'A large red candle that completely engulfs the previous green candle. Strong bearish reversal.', hint: 'Big red candle swallows the small green one. Bearish!', signal: 'bearish', candles: [{type:'bull',body:30},{type:'bear',body:70},{type:'mystery',body:30}] },
             { id: 'morning_star', name: 'Morning Star', description: 'Three-candle bullish reversal: bearish, small indecision, then bullish. Signals trend reversal up.', hint: 'Down, small body, then up. Morning Star = Bullish reversal!', signal: 'bullish', candles: [{type:'bear',body:50},{type:'doji',body:10},{type:'bull',body:50},{type:'mystery',body:30}] },
             { id: 'evening_star', name: 'Evening Star', description: 'Three-candle bearish reversal: bullish, small indecision, then bearish. Signals trend reversal down.', hint: 'Up, small body, then down. Evening Star = Bearish reversal!', signal: 'bearish', candles: [{type:'bull',body:50},{type:'doji',body:10},{type:'bear',body:50},{type:'mystery',body:30}] },
-            { id: 'three_soldiers', name: 'Three White Soldiers', description: 'Three consecutive bullish candles with higher closes. Strong bullish continuation pattern.', hint: 'Three green candles marching up. Bullish continuation!', signal: 'bullish', candles: [{type:'bull',body:40},{type:'bull',body:50},{type:'bull',body:60},{type:'mystery',body:30}] },
-            { id: 'three_crows', name: 'Three Black Crows', description: 'Three consecutive bearish candles with lower closes. Strong bearish continuation pattern.', hint: 'Three red candles marching down. Bearish continuation!', signal: 'bearish', candles: [{type:'bear',body:60},{type:'bear',body:50},{type:'bear',body:40},{type:'mystery',body:30}] }
+            { id: 'three_soldiers', name: 'Three White Soldiers', description: 'Three green candles in a row, each closing higher. The uptrend is continuing with strength.', hint: 'The up-trend keeps marching on = Continuation!', signal: 'continuation', candles: [{type:'bull',body:40},{type:'bull',body:50},{type:'bull',body:60},{type:'mystery',body:30}] },
+            { id: 'three_crows', name: 'Three Black Crows', description: 'Three red candles in a row, each closing lower. The downtrend is continuing.', hint: 'The down-trend keeps marching on = Continuation!', signal: 'continuation', candles: [{type:'bear',body:60},{type:'bear',body:50},{type:'bear',body:40},{type:'mystery',body:30}] }
         ];
 
         function startGame() {

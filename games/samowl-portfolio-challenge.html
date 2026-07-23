@@ -559,26 +559,20 @@
         async function saveGame() {
             localStorage.setItem('portfolioChallenge', JSON.stringify(gameState));
             
-            // Calculate total portfolio value
-            let holdingsValue = 0;
+            // Build a holdings map {SYMBOL: shares}. The SERVER values it at real
+            // prices (trustworthy leaderboard) instead of trusting a client number.
+            const holdingsMap = {};
             for (const [symbol, holding] of Object.entries(gameState.holdings)) {
-                const stock = stocks.find(s => s.symbol === symbol);
-                if (stock) {
-                    holdingsValue += holding.shares * stock.basePrice;
-                }
+                holdingsMap[symbol] = holding.shares;
             }
-            const totalValue = gameState.cash + holdingsValue;
             
             // Save to Supabase leaderboard
             try {
-                const { error } = await supabaseClient
-                    .from('portfolio_leaderboard')
-                    .upsert({
-                        player_name: gameState.playerName,
-                        portfolio_value: totalValue
-                    }, {
-                        onConflict: 'player_name'
-                    });
+                const { error } = await supabaseClient.rpc('rpc_submit_score', {
+                    p_name: gameState.playerName,
+                    p_cash: gameState.cash,
+                    p_holdings: holdingsMap
+                });
                 
                 if (error) console.log('Supabase save error:', error);
             } catch (e) {
