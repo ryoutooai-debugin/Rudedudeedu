@@ -610,21 +610,32 @@
             setInterval(updateLeaderboard, 30000);
         }
 
-        // Fetch real prices from price.json (server-side updated)
+        // Fetch live-ish prices from the Supabase `prices` table
+        // (refreshed server-side every ~15 min during market hours).
         async function fetchRealPrices() {
             try {
-                const response = await fetch('price.json');
-                const prices = await response.json();
-                
-                // Update stock prices from JSON, track previous price
-                stocks.forEach(stock => {
-                    if (prices[stock.symbol]) {
-                        stock.prevPrice = stock.basePrice; // Save old price before updating
-                        stock.basePrice = prices[stock.symbol];
-                    }
-                });
+                const { data: rows, error } = await supabaseClient
+                    .from('prices')
+                    .select('symbol, price, prev_close');
+                if (error) throw error;
+                if (rows && rows.length) {
+                    const bySym = {};
+                    rows.forEach(r => { bySym[r.symbol] = r; });
+                    // Only update tickers present in the feed; others keep their
+                    // last known price so the game still works if a symbol is stale.
+                    stocks.forEach(stock => {
+                        const r = bySym[stock.symbol];
+                        if (r && r.price != null) {
+                            stock.basePrice = Number(r.price);
+                            // Use previous close as the baseline for "% today"
+                            stock.prevPrice = r.prev_close != null
+                                ? Number(r.prev_close)
+                                : stock.basePrice;
+                        }
+                    });
+                }
             } catch (e) {
-                console.log('Using simulated prices (price.json unavailable)');
+                console.log('Using fallback prices (prices table unavailable):', e?.message || e);
             }
             renderMarket();
             updateDashboard();
