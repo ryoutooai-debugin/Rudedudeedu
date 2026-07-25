@@ -36,6 +36,13 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
+
+        .h1-owl {
+            width: 1.15em;
+            height: auto;
+            vertical-align: -0.22em;
+            margin-right: 0.08em;
+        }
         
         .tagline {
             color: #888;
@@ -114,7 +121,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🦉 SamOwl Games</h1>
+            <h1><img src="assets/mascot/web/sam-wave.png" alt="" class="h1-owl"> SamOwl Games</h1>
             <p class="tagline">Learn trading through play</p>
         </header>
         
@@ -152,12 +159,12 @@
         </div>
         
         <!-- Floating Mascot -->
-        <div class="mascot-container" title="Click me!" onclick="showSamOwl('🦉 Hoot! Pick a game and start learning!')" style="position: fixed; bottom: 20px; right: 20px; font-size: 3em; cursor: pointer; z-index: 9999; animation: float 3s ease-in-out infinite;">🦉</div>
+        <div class="mascot-container" title="Click me!" onclick="showSamOwl('🦉 Hoot! Pick a game and start learning!')" style="position: fixed; bottom: 20px; right: 20px; font-size: 3em; cursor: pointer; z-index: 9999; animation: float 3s ease-in-out infinite;"><img src="assets/mascot/web/sam-wave.png" alt="Sam the Owl" style="width: 2.2em; height: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,.45));"></div>
         
         <!-- SamOwl Message Modal -->
         <div class="modal-overlay" id="samowlModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
             <div class="modal" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 2px solid #667eea; border-radius: 20px; padding: 30px; max-width: 400px; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-                <div style="font-size: 3em; margin-bottom: 10px;">🦉</div>
+                <img src="assets/mascot/web/sam-teach.png" alt="" style="width: 110px; height: auto; display: block; margin: 0 auto 10px;">
                 <p id="samowlMessage" style="margin: 20px 0; font-size: 1.2em; line-height: 1.5;"></p>
                 <button onclick="closeSamOwlModal()" style="margin-top: 20px; padding: 15px 40px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 25px; font-size: 1.1em; font-weight: bold; cursor: pointer;">Got it!</button>
             </div>

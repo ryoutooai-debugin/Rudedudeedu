@@ -129,7 +129,7 @@
     <div class="game-container">
         <!-- Start Screen -->
         <div class="start-screen" id="startScreen">
-            <div class="start-mascot">🦉</div>
+            <div class="start-mascot"><img src="../assets/mascot/web/sam-wave.png" alt="Sam the Owl" style="width:1.1em;height:auto;display:block;margin:0 auto;"></div>
             <h1 class="start-title">SamOwl's Trading Quest</h1>
             <p class="start-subtitle">Grow $10,000 into $15,000 in 30 days!</p>
             <div class="age-badge">Ages 10-12</div>
@@ -154,7 +154,7 @@
         <!-- Header -->
         <div class="header">
             <div class="samowl-brand">
-                <div class="samowl-logo" id="mascot">🦉</div>
+                <div class="samowl-logo" id="mascot"><img src="../assets/mascot/web/sam-wave.png" alt="" style="width:1.1em;height:auto;display:block;"></div>
                 <div class="brand-text"><h1>SamOwl</h1><p>Trading Quest</p></div>
             </div>
             <div class="age-badge">Ages 10-12</div>
@@ -545,7 +545,12 @@
             const pct = Math.max(0, Math.min(100, ((v - START_CASH) / (GOAL - START_CASH)) * 100));
             document.getElementById('goalFill').style.width = pct + '%';
             // mascot mood
-            document.getElementById('mascot').textContent = v >= GOAL ? '🤩' : v >= START_CASH ? '🦉' : '😟';
+            // Sam reacts to portfolio value: cheering / neutral / worried
+            const mascotImg = document.querySelector('#mascot img');
+            if (mascotImg) {
+                mascotImg.src = '../assets/mascot/web/'
+                    + (v >= GOAL ? 'sam-cheer.png' : v >= START_CASH ? 'sam-wave.png' : 'sam-worried.png');
+            }
         }
 
         function renderTrade() {

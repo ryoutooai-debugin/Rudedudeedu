@@ -1,0 +1,21 @@
+# Generated-art masters stay local. The site only ever loads the downscaled
+# copies in mascot/web/ and the *-icon.png files, which total ~76 KB.
+# Everything ignored here is free to regenerate — each README documents the
+# exact model, settings and prompt, and Higgsfield's unlimited tier costs nothing.
+
+# 2048px originals kept only as a re-crop source
+_masters/
+
+# 2048px mascot masters (web/ copies are what ship)
+mascot/sam-cheer.png
+mascot/sam-coin.png
+mascot/sam-teach.png
+mascot/sam-wave.png
+mascot/sam-worried.png
+
+# 4:3 landscape hero — generated, but nothing references it yet
+game-cards/day-trader.png
+game-cards/day-trader.webp
+
+# contact sheet, superseded by mascot/reference/
+game-cards/_check.png

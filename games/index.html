@@ -35,6 +35,12 @@
             animation: float 3s ease-in-out infinite;
             display: inline-block;
         }
+
+        .logo img {
+            width: 1.15em;
+            height: auto;
+            display: block;
+        }
         
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -104,6 +110,17 @@
         .game-icon {
             font-size: 4em;
             margin-bottom: 15px;
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-icon img {
+            max-height: 96px;
+            max-width: 96px;
+            width: auto;
+            height: auto;
         }
         
         .game-title {
@@ -247,6 +264,13 @@
             cursor: pointer;
             z-index: 100;
         }
+
+        .mascot-container img {
+            width: 2.2em;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,.45));
+        }
         
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -273,7 +297,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="logo">🦉</div>
+            <div class="logo"><img src="../assets/mascot/web/sam-wave.png" alt="Sam the Owl"></div>
             <h1 class="brand-name">SamOwl Games</h1>
             <p class="tagline">Learn trading through play! 📈🎮</p>
         </div>
@@ -282,7 +306,7 @@
         <div class="games-grid">
             <!-- Color Match -->
             <div class="game-card" onclick="window.location.href='samowl-color-match.html'">
-                <div class="game-icon">🎨</div>
+                <div class="game-icon"><img src="../assets/game-cards/color-match-icon.png" alt=""></div>
                 <h2 class="game-title">Color Match</h2>
                 <div class="game-age">Ages 4-6</div>
                 <p class="game-description">
@@ -298,7 +322,7 @@
             
             <!-- Market Match -->
             <div class="game-card" onclick="window.location.href='samowl-market-match.html'">
-                <div class="game-icon">📊</div>
+                <div class="game-icon"><img src="../assets/game-cards/market-match-icon.png" alt=""></div>
                 <h2 class="game-title">Market Match</h2>
                 <div class="game-age">Ages 7-9</div>
                 <p class="game-description">
@@ -314,7 +338,7 @@
             
             <!-- Trading Quest -->
             <div class="game-card" onclick="window.location.href='samowl-trading-quest.html'">
-                <div class="game-icon">⚔️</div>
+                <div class="game-icon"><img src="../assets/game-cards/trading-quest-icon.png" alt=""></div>
                 <h2 class="game-title">Trading Quest</h2>
                 <div class="game-age">Ages 10-12</div>
                 <p class="game-description">
@@ -330,7 +354,7 @@
             
             <!-- Portfolio Challenge -->
             <div class="game-card" onclick="window.location.href='samowl-portfolio-challenge.html'">
-                <div class="game-icon">🏆</div>
+                <div class="game-icon"><img src="../assets/game-cards/portfolio-challenge-icon.png" alt=""></div>
                 <h2 class="game-title">Portfolio Challenge</h2>
                 <div class="game-age">Ages 13+</div>
                 <p class="game-description">
@@ -346,7 +370,7 @@
 
             <!-- Pattern Master -->
             <div class="game-card" onclick="window.location.href='samowl-pattern-master.html'">
-                <div class="game-icon">📈</div>
+                <div class="game-icon"><img src="../assets/game-cards/pattern-master-icon.png" alt=""></div>
                 <h2 class="game-title">Pattern Master</h2>
                 <div class="game-age">Ages 13+</div>
                 <p class="game-description">
@@ -362,7 +386,7 @@
 
             <!-- Day Trader -->
             <div class="game-card" onclick="window.location.href='samowl-day-trader.html'">
-                <div class="game-icon">🦉</div>
+                <div class="game-icon"><img src="../assets/game-cards/day-trader-icon.png" alt=""></div>
                 <h2 class="game-title">Day Trader</h2>
                 <div class="game-age">Ages 13+</div>
                 <p class="game-description">
@@ -404,6 +428,6 @@
     </div>
     
     <!-- Floating Mascot -->
-    <div class="mascot-container" title="Click me!" onclick="alert('🦉 Hoot! Pick a game and start learning!')">🦉</div>
+    <div class="mascot-container" title="Click me!" onclick="alert('🦉 Hoot! Pick a game and start learning!')"><img src="../assets/mascot/web/sam-wave.png" alt="Sam the Owl"></div>
 </body>
 </html>
